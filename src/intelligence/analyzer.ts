@@ -1,8 +1,8 @@
 /**
  * IntelligenceAnalyzer.ts
- * Description: Cognitive threat detection rules
+ * Description: Optimized memory allocation and analysis loops
  * Part of CorvusX: Intelligence in the Shadows
- * Generated on: 2026-05-31T17:59:18.386Z
+ * Generated on: 2026-05-31T17:59:18.513Z
  */
 
 import { EventEmitter } from 'events';
