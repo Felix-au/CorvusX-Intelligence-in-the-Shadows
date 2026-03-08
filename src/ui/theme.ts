@@ -1,1 +1,1 @@
-export const shadowTheme = { bg: '#000000', fg: '#00ff33', accent: '#ff0033' };
+export const shadowTheme = { bg: '#08080a', fg: '#00f0ff', accent: '#ff0055' };
