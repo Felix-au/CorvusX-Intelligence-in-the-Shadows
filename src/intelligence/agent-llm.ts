@@ -1,8 +1,8 @@
 /**
  * AgentLLM.ts
- * Description: System core LLM interface handler
+ * Description: LLM interface handler with race timeout conditions
  * Part of CorvusX: Intelligence in the Shadows
- * Generated on: 2026-05-31T17:59:19.566Z
+ * Generated on: 2026-05-31T17:59:19.699Z
  */
 
 import { EventEmitter } from 'events';
