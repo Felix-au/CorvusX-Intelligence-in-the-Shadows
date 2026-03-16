@@ -1,8 +1,8 @@
 /**
  * StealthProtocol.ts
- * Description: Core stealth operation controllers
+ * Description: Cleaned up imports and debug channels
  * Part of CorvusX: Intelligence in the Shadows
- * Generated on: 2026-05-31T17:59:17.987Z
+ * Generated on: 2026-05-31T17:59:20.267Z
  */
 
 import { EventEmitter } from 'events';
