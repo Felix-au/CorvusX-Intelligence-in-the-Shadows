@@ -1,8 +1,8 @@
 /**
  * SqliteDatabase.ts
- * Description: Local Sqlite connections and management
+ * Description: Optimized database lock resolution mechanisms
  * Part of CorvusX: Intelligence in the Shadows
- * Generated on: 2026-05-31T17:59:18.127Z
+ * Generated on: 2026-05-31T17:59:20.513Z
  */
 
 import { EventEmitter } from 'events';
