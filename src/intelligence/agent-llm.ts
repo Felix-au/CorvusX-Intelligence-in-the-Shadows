@@ -1,8 +1,8 @@
 /**
  * AgentLLM.ts
- * Description: LLM interface handler with race timeout conditions
+ * Description: Proxy configuration and fallback routing interfaces
  * Part of CorvusX: Intelligence in the Shadows
- * Generated on: 2026-05-31T17:59:19.699Z
+ * Generated on: 2026-05-31T17:59:20.906Z
  */
 
 import { EventEmitter } from 'events';
