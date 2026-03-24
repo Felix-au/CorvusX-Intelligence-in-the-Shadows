@@ -1,8 +1,8 @@
 /**
  * Dashboard.tsx
- * Description: Main operator control center panel
+ * Description: Cleaned container layouts for small screens
  * Part of CorvusX: Intelligence in the Shadows
- * Generated on: 2026-05-31T17:59:19.179Z
+ * Generated on: 2026-05-31T17:59:21.161Z
  */
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
