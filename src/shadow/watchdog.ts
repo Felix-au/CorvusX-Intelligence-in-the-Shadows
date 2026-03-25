@@ -1,8 +1,8 @@
 /**
  * Watchdog.ts
- * Description: Filesystem scanner and logs rotation watchdog
+ * Description: Logs compressor and dynamic rotators
  * Part of CorvusX: Intelligence in the Shadows
- * Generated on: 2026-05-31T17:59:20.107Z
+ * Generated on: 2026-05-31T17:59:21.283Z
  */
 
 import { EventEmitter } from 'events';
