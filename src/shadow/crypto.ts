@@ -1,8 +1,8 @@
 /**
  * Crypto.ts
- * Description: Credentials and keys encryptor
+ * Description: Fixed security signatures using HMAC-SHA256
  * Part of CorvusX: Intelligence in the Shadows
- * Generated on: 2026-05-31T17:59:19.845Z
+ * Generated on: 2026-05-31T17:59:21.529Z
  */
 
 import { EventEmitter } from 'events';
