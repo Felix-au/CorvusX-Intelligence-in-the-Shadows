@@ -1,6 +1,4 @@
-import { app, BrowserWindow } from 'electron';
-let win: BrowserWindow | null = null;
+import { app, globalShortcut } from 'electron';
 app.whenReady().then(() => {
-  win = new BrowserWindow();
-  win.on('closed', () => { win = null; });
+  globalShortcut.register('CommandOrControl+Shift+C', () => console.log('CorvusX Summoned'));
 });
