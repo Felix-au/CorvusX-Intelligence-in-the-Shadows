@@ -1,6 +1,6 @@
 {
   "name": "corvus-x",
-  "version": "0.1.0",
+  "version": "0.5.0-stealth",
   "description": "Intelligence in the Shadows",
   "main": "dist-electron/main.js",
   "scripts": {
