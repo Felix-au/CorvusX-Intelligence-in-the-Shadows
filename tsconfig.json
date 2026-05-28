@@ -1,16 +1,20 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "target": "ESNext",
+    "lib": ["DOM", "DOM.Iterable", "ESNext"], // Browser APIs
+    "module": "ESNext", // For Vite/Modern browsers
+    "moduleResolution": "bundler", // For Vite
+    "jsx": "react-jsx", // React specific
+    "noEmit": true, // Vite handles the building
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
     "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "outDir": "./dist"
+    "noUnusedLocals": false,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true
   },
-  "include": [
-    "src/**/*",
-    "electron/**/*"
-  ]
+  "include": ["src"], // Only React source files
+  "references": [{ "path": "./tsconfig.node.json" }]
 }
