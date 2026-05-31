@@ -108,7 +108,7 @@
       "deleteAppDataOnUninstall": false
     },
     "portable": {
-      "requestExecutionLevel": "highest"
+      "requestExecutionLevel": "user"
     },
     "publish": [
       {
