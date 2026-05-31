@@ -31,7 +31,7 @@
   },
   "build": {
     "appId": "com.electron.meeting-notes",
-    "productName": "CorvusX: Intelligence in the Shadows",
+    "productName": "CorvusX Intelligence in the Shadows",
     "files": [
       "dist/**/*",
       "dist-electron/**/*",
@@ -103,9 +103,12 @@
     },
     "nsis": {
       "oneClick": false,
-      "perMachine": false,
+      "perMachine": true,
       "allowToChangeInstallationDirectory": true,
       "deleteAppDataOnUninstall": false
+    },
+    "portable": {
+      "requestExecutionLevel": "highest"
     },
     "publish": [
       {
