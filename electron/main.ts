@@ -298,6 +298,8 @@ async function initializeApp() {
 
   app.dock?.hide() // Hide dock icon (optional)
   app.commandLine.appendSwitch("disable-background-timer-throttling")
+  app.commandLine.appendSwitch("no-sandbox")
+  app.commandLine.appendSwitch("disable-gpu-sandbox")
 }
 
 // Start the application
