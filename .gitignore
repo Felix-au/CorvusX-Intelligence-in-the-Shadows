@@ -139,3 +139,6 @@ dist
 
 # Scratch directory
 /scratch
+
+# Release directory
+release/

@@ -16,7 +16,7 @@ interface QueueCommandsProps {
 
 const QueueCommands: React.FC<QueueCommandsProps> = ({
   onTooltipVisibilityChange,
-  screenshots,
+  screenshots: _screenshots,
   onChatToggle,
   onSettingsToggle,
   audioResult,
