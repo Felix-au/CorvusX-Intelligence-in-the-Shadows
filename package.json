@@ -98,7 +98,8 @@
         }
       ],
       "icon": "assets/icons/png/",
-      "category": "Office"
+      "category": "Office",
+      "maintainer": "Felix-au <harshit.soni.23cse@bmu.edu.in>"
     },
     "nsis": {
       "oneClick": false,
@@ -115,9 +116,9 @@
     ]
   },
   "keywords": [],
-  "author": "",
+  "author": "Felix-au <harshit.soni.23cse@bmu.edu.in>",
   "license": "ISC",
-  "description": "",
+  "description": "CorvusX: Intelligence in the Shadows",
   "devDependencies": {
     "@types/color": "^4.2.0",
     "@types/diff": "^6.0.0",
