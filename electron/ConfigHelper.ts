@@ -8,6 +8,8 @@ export interface AppConfig {
   provider: "gemini" | "omnikey"
   model: string
   mode: "code" | "general"
+  theme: "light" | "dark"
+  opacity: number
 }
 
 const DEFAULT_CONFIG: AppConfig = {
@@ -15,7 +17,9 @@ const DEFAULT_CONFIG: AppConfig = {
   apiKey: "",
   provider: "gemini",
   model: "gemini-2.5-flash",
-  mode: "code"
+  mode: "code",
+  theme: "dark",
+  opacity: 0.25
 }
 
 export class ConfigHelper {
@@ -39,7 +43,9 @@ export class ConfigHelper {
         apiKey: envGeminiKey || envOmnikeyKey || "",
         provider: envGeminiKey ? "gemini" : "omnikey",
         model: envModel || (envGeminiKey ? "gemini-2.5-flash" : "auto"),
-        mode: "code"
+        mode: "code",
+        theme: "dark",
+        opacity: 0.25
       }
     }
 
@@ -58,7 +64,9 @@ export class ConfigHelper {
         apiKey: parsed.apiKey ?? DEFAULT_CONFIG.apiKey,
         provider: parsed.provider ?? DEFAULT_CONFIG.provider,
         model: parsed.model ?? DEFAULT_CONFIG.model,
-        mode: parsed.mode ?? DEFAULT_CONFIG.mode
+        mode: parsed.mode ?? DEFAULT_CONFIG.mode,
+        theme: parsed.theme ?? DEFAULT_CONFIG.theme,
+        opacity: parsed.opacity ?? DEFAULT_CONFIG.opacity
       }
     } catch (error) {
       console.error("[ConfigHelper] Error reading config file:", error)
