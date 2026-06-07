@@ -104,23 +104,23 @@ const CodeComparisonSection = ({
 
   return (
     <div className="space-y-1.5">
-      <h2 className="text-[13px] font-medium text-white tracking-wide">
+      <h2 className="text-[13px] font-semibold text-primary tracking-wide">
         Code Comparison
       </h2>
       {isLoading ? (
         <div className="space-y-1">
           <div className="mt-3 flex">
-            <p className="text-xs bg-gradient-to-r from-gray-300 via-gray-100 to-gray-300 bg-clip-text text-transparent animate-pulse">
+            <p className="text-xs text-secondary/70 animate-pulse">
               Loading code comparison...
             </p>
           </div>
         </div>
       ) : (
-        <div className="flex flex-row gap-0.5 bg-[#161b22] rounded-lg overflow-hidden">
+        <div className="flex flex-row gap-0.5 bg-[#161b22] rounded-lg overflow-hidden border border-black/10 dark:border-gray-700">
           {/* Previous Code */}
-          <div className="w-1/2 border-r border-gray-700">
-            <div className="bg-[#2d333b] px-3 py-1.5">
-              <h3 className="text-[11px] font-medium text-gray-200">
+          <div className="w-1/2 border-r border-black/10 dark:border-gray-700">
+            <div className="bg-black/10 dark:bg-[#2d333b] px-3 py-1.5 border-b border-black/5 dark:border-gray-700">
+              <h3 className="text-[11px] font-medium text-secondary">
                 Previous Version
               </h3>
             </div>
@@ -156,8 +156,8 @@ const CodeComparisonSection = ({
 
           {/* New Code */}
           <div className="w-1/2">
-            <div className="bg-[#2d333b] px-3 py-1.5">
-              <h3 className="text-[11px] font-medium text-gray-200">
+            <div className="bg-black/10 dark:bg-[#2d333b] px-3 py-1.5 border-b border-black/5 dark:border-gray-700">
+              <h3 className="text-[11px] font-medium text-secondary">
                 New Version
               </h3>
             </div>
@@ -199,9 +199,11 @@ const CodeComparisonSection = ({
 interface DebugProps {
   isProcessing: boolean
   setIsProcessing: (isProcessing: boolean) => void
+  theme?: "light" | "dark"
+  opacity?: number
 }
 
-const Debug: React.FC<DebugProps> = ({ isProcessing, setIsProcessing }) => {
+const Debug: React.FC<DebugProps> = ({ isProcessing, setIsProcessing, theme = "dark", opacity = 0.25 }) => {
   const queryClient = useQueryClient()
   const contentRef = useRef<HTMLDivElement>(null)
 
@@ -341,7 +343,7 @@ const Debug: React.FC<DebugProps> = ({ isProcessing, setIsProcessing }) => {
   }
 
   return (
-    <div ref={contentRef} className="relative space-y-3 px-4 py-3 ">
+    <div ref={contentRef} className="relative space-y-3 px-4 py-3">
       <Toast
         open={toastOpen}
         onOpenChange={setToastOpen}
@@ -369,10 +371,11 @@ const Debug: React.FC<DebugProps> = ({ isProcessing, setIsProcessing }) => {
       <ExtraScreenshotsQueueHelper
         extraScreenshots={extraScreenshots}
         onTooltipVisibilityChange={handleTooltipVisibilityChange}
+        theme={theme}
       />
 
       {/* Main Content */}
-      <div className="w-full text-sm text-black bg-black/60 rounded-md">
+      <div className="w-full text-sm liquid-glass shadow-lg">
         <div className="rounded-lg overflow-hidden">
           <div className="px-4 py-3 space-y-4">
             {/* Thoughts Section */}
