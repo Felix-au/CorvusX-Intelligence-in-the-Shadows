@@ -14,9 +14,11 @@ import { renderMarkdown } from "../lib/utils"
 
 interface QueueProps {
   setView: React.Dispatch<React.SetStateAction<"queue" | "solutions" | "debug">>
+  theme?: "light" | "dark"
+  opacity?: number
 }
 
-const Queue: React.FC<QueueProps> = ({ setView }) => {
+const Queue: React.FC<QueueProps> = ({ setView, theme = "dark", opacity = 0.25 }) => {
   const [toastOpen, setToastOpen] = useState(false)
   const [toastMessage, setToastMessage] = useState<ToastMessage>({
     title: "",
@@ -310,6 +312,7 @@ const Queue: React.FC<QueueProps> = ({ setView }) => {
               chatMessagesCount={chatMessages.length}
               mode={mode}
               onModeToggle={handleModeToggle}
+              theme={theme}
             />
           </div>
           {/* Conditional Settings Interface */}
@@ -320,6 +323,7 @@ const Queue: React.FC<QueueProps> = ({ setView }) => {
                 onChatOpen={() => setIsChatOpen(true)}
                 mode={mode}
                 onModeSwitch={setMode}
+                theme={theme}
               />
             </div>
           )}
@@ -327,14 +331,14 @@ const Queue: React.FC<QueueProps> = ({ setView }) => {
           {/* Conditional Chat Interface */}
           {isChatOpen && (
             <div className="mt-4 w-full mx-auto liquid-glass chat-container p-4 flex flex-col">
-              <div className="flex-1 overflow-y-auto mb-3 p-3 rounded-lg bg-white/10 backdrop-blur-md max-h-64 min-h-[120px] glass-content border border-white/20 shadow-lg">
+              <div className="flex-1 overflow-y-auto mb-3 p-3 rounded-lg bg-black/5 dark:bg-white/10 backdrop-blur-md max-h-64 min-h-[120px] glass-content border border-black/10 dark:border-white/20 shadow-lg">
                 {chatMessages.length === 0 ? (
-                  <div className="text-sm text-gray-600 text-center mt-8">
+                  <div className="text-sm text-secondary text-center mt-8">
                     💬 Chat with ☁️ {currentModel.model}
                     <br />
-                    <span className="text-xs text-gray-500">Take a screenshot (Cmd+H) for automatic analysis</span>
+                    <span className="text-xs text-muted">Take a screenshot (Cmd+H) for automatic analysis</span>
                     <br />
-                    <span className="text-xs text-gray-500">Click ⚙️ Models to switch AI providers</span>
+                    <span className="text-xs text-muted">Click ⚙️ Models to switch AI providers</span>
                   </div>
                 ) : (
                   chatMessages.map((msg, idx) => (
@@ -344,8 +348,8 @@ const Queue: React.FC<QueueProps> = ({ setView }) => {
                     >
                       <div
                         className={`max-w-[80%] px-3 py-1.5 rounded-xl text-xs shadow-md backdrop-blur-sm border ${msg.role === "user"
-                          ? "bg-gray-700/80 text-gray-100 ml-12 border-gray-600/40"
-                          : "bg-white/85 text-gray-700 mr-12 border-gray-200/50"
+                          ? "bg-gray-800/95 dark:bg-gray-700/80 text-gray-100 ml-12 border-gray-700/40 dark:border-gray-600/40"
+                          : "bg-white/95 dark:bg-white/10 text-primary mr-12 border-black/10 dark:border-white/10"
                           }`}
                         style={{ wordBreak: "break-word", lineHeight: "1.4" }}
                       >
@@ -368,19 +372,19 @@ const Queue: React.FC<QueueProps> = ({ setView }) => {
                 )}
                 {chatLoading && (
                   <div className="flex justify-start mb-3">
-                    <div className="bg-white/85 text-gray-600 px-3 py-1.5 rounded-xl text-xs backdrop-blur-sm border border-gray-200/50 shadow-md mr-12">
+                    <div className="bg-white/95 dark:bg-white/10 text-primary px-3 py-1.5 rounded-xl text-xs backdrop-blur-sm border border-black/10 dark:border-white/15 shadow-md mr-12">
                       <span className="inline-flex items-center">
-                        <span className="animate-pulse text-gray-400">●</span>
-                        <span className="animate-pulse animation-delay-200 text-gray-400">●</span>
-                        <span className="animate-pulse animation-delay-400 text-gray-400">●</span>
-                        <span className="ml-2">{currentModel.model} is replying...</span>
+                        <span className="animate-pulse text-muted">●</span>
+                        <span className="animate-pulse animation-delay-200 text-muted">●</span>
+                        <span className="animate-pulse animation-delay-400 text-muted">●</span>
+                        <span className="ml-2 text-secondary">{currentModel.model} is replying...</span>
                       </span>
                     </div>
                   </div>
                 )}
               </div>
               {attachedScreenshots.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-2 p-2 rounded-lg bg-white/5 border border-white/10 backdrop-blur-sm">
+                <div className="flex flex-wrap gap-2 mb-2 p-2 rounded-lg bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 backdrop-blur-sm">
                   {attachedScreenshots.map((scr, idx) => (
                     <div key={idx} className="relative w-16 h-12 group">
                       <img
@@ -411,7 +415,7 @@ const Queue: React.FC<QueueProps> = ({ setView }) => {
               >
                 <input
                   ref={chatInputRef}
-                  className="flex-1 rounded-lg px-3 py-2 bg-white/25 backdrop-blur-md text-gray-800 placeholder-gray-500 text-xs focus:outline-none focus:ring-1 focus:ring-gray-400/60 border border-white/40 shadow-lg transition-all duration-200"
+                  className="flex-1 rounded-lg px-3 py-2 bg-white/40 dark:bg-white/20 backdrop-blur-md text-primary placeholder-secondary/60 text-xs focus:outline-none focus:ring-1 focus:ring-primary/40 border border-black/10 dark:border-white/20 shadow-lg transition-all duration-200"
                   placeholder="Type your message..."
                   value={chatInput}
                   onChange={e => setChatInput(e.target.value)}
@@ -419,12 +423,12 @@ const Queue: React.FC<QueueProps> = ({ setView }) => {
                 />
                 <button
                   type="submit"
-                  className="p-2 rounded-lg bg-gray-600/80 hover:bg-gray-700/80 border border-gray-500/60 flex items-center justify-center transition-all duration-200 backdrop-blur-sm shadow-lg disabled:opacity-50"
+                  className="p-2 rounded-lg bg-gray-700/90 dark:bg-white/10 hover:bg-gray-800 dark:hover:bg-white/20 border border-gray-600/60 dark:border-white/10 flex items-center justify-center transition-all duration-200 backdrop-blur-sm shadow-lg disabled:opacity-50"
                   disabled={chatLoading || (!chatInput.trim() && attachedScreenshots.length === 0)}
                   tabIndex={-1}
                   aria-label="Send"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="white" className="w-4 h-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-white dark:text-primary">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-7.5-15-7.5v6l10 1.5-10 1.5v6z" />
                   </svg>
                 </button>
