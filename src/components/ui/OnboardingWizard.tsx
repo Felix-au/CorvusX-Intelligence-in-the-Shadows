@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { 
   Sparkles, 
   Laptop, 
@@ -9,9 +9,9 @@ import {
   AlertTriangle, 
   Code, 
   Command, 
-  ShieldAlert,
   Eye,
-  EyeOff
+  EyeOff,
+  Palette
 } from "lucide-react"
 
 interface OnboardingWizardProps {
@@ -23,6 +23,8 @@ type ModeType = "code" | "general"
 
 export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }) => {
   const [step, setStep] = useState<number>(1)
+  const [theme, setTheme] = useState<"light" | "dark">("dark")
+  const [opacity, setOpacity] = useState<number>(0.25)
   const [provider, setProvider] = useState<ProviderType>("gemini")
   const [apiKey, setApiKey] = useState<string>("")
   const [showApiKey, setShowApiKey] = useState<boolean>(false)
@@ -33,6 +35,17 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
   const [testStatus, setTestStatus] = useState<"idle" | "success" | "error">("idle")
   const [errorMessage, setErrorMessage] = useState<string>("")
   const [hasTestedSuccessfully, setHasTestedSuccessfully] = useState<boolean>(false)
+
+  // Live preview styling synchronization
+  useEffect(() => {
+    const root = document.documentElement
+    root.style.setProperty("--bg-color", theme === "light" ? "255, 255, 255" : "0, 0, 0")
+    root.style.setProperty("--bg-opacity", String(opacity))
+    root.style.setProperty("--text-color-primary", theme === "light" ? "#1f2937" : "#f9fafb")
+    root.style.setProperty("--text-color-secondary", theme === "light" ? "#4b5563" : "#d1d5db")
+    root.style.setProperty("--text-color-muted", theme === "light" ? "#6b7280" : "#9ca3af")
+    root.style.setProperty("--border-color", theme === "light" ? "rgba(0, 0, 0, 0.15)" : "rgba(255, 255, 255, 0.15)")
+  }, [theme, opacity])
 
   const handleTestConnection = async () => {
     if (!apiKey.trim()) {
@@ -46,10 +59,8 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
     setErrorMessage("")
 
     try {
-      // Auto-determine model based on key provider: OmniKey defaults to 'auto', Gemini to 'gemini-2.5-flash'
       const modelToTest = provider === "omnikey" ? "auto" : "gemini-2.5-flash"
       
-      // Let's adapt key if OmniKey was selected but doesn't start with prefix
       let keyToTest = apiKey.trim()
       if (provider === "omnikey" && !keyToTest.startsWith("omnikey-")) {
         keyToTest = "omnikey-" + keyToTest
@@ -73,8 +84,8 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
   }
 
   const handleNext = () => {
-    if (step === 2 && !hasTestedSuccessfully) {
-      // Must test connection successfully to proceed
+    if (step === 3 && !hasTestedSuccessfully) {
+      // Must test connection successfully to proceed from the provider step (Step 3)
       return
     }
     setStep((prev) => prev + 1)
@@ -98,7 +109,9 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
         finalKey,
         provider,
         defaultModel,
-        mode
+        mode,
+        theme,
+        opacity
       )
       if (response.success) {
         onComplete()
@@ -120,11 +133,11 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
 
         {/* Progress Header */}
         <div className="flex items-center justify-between mb-4 pb-2 border-b border-white/10 glass-content">
-          <span className="text-[11px] font-bold tracking-widest text-gray-500 uppercase">
-            CorvusX Setup &bull; Step {step} of 5
+          <span className="text-[11px] font-bold tracking-widest text-muted uppercase">
+            CorvusX Setup &bull; Step {step} of 6
           </span>
           <div className="flex gap-1">
-            {[1, 2, 3, 4, 5].map((i) => (
+            {[1, 2, 3, 4, 5, 6].map((i) => (
               <div 
                 key={i} 
                 className={`h-1 rounded-full transition-all duration-300 ${
@@ -138,53 +151,125 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
         {/* Content Slides */}
         <div className="flex-1 flex flex-col justify-center py-2 glass-content text-left">
           
-          {/* STEP 1: WELCOME */}
+          {/* STEP 1: APPEARANCE CUSTOMIZATION */}
           {step === 1 && (
             <div className="space-y-4 animate-fadeIn">
               <div className="flex items-center gap-2">
+                <Palette className="w-6 h-6 text-pink-400" />
+                <h1 className="text-lg font-extrabold text-primary tracking-tight">
+                  Customize Appearance
+                </h1>
+              </div>
+              <p className="text-xs text-secondary leading-relaxed font-medium">
+                Adjust the window styling to ensure all text remains highly readable against your desktop background. Changes apply live below.
+              </p>
+              
+              <div className="space-y-4 pt-2 border-t border-white/10">
+                {/* Theme choice */}
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-muted uppercase tracking-wider block">
+                    Background Theme
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setTheme("dark")}
+                      className={`p-2.5 rounded-xl border text-left flex flex-col justify-between transition-all duration-200 cursor-pointer ${
+                        theme === "dark"
+                          ? "bg-white/85 border-blue-500/50 shadow-md ring-1 ring-blue-500/20 text-gray-800"
+                          : "bg-white/10 border-white/25 text-primary hover:bg-white/20"
+                      }`}
+                    >
+                      <span className="text-xs font-bold">🌙 Dark Backdrop</span>
+                      <span className="text-[9px] mt-1 leading-normal opacity-70">
+                        Translucent blackish background for dark desktops.
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setTheme("light")}
+                      className={`p-2.5 rounded-xl border text-left flex flex-col justify-between transition-all duration-200 cursor-pointer ${
+                        theme === "light"
+                          ? "bg-white/85 border-blue-500/50 shadow-md ring-1 ring-blue-500/20 text-gray-800"
+                          : "bg-white/10 border-white/25 text-primary hover:bg-white/20"
+                      }`}
+                    >
+                      <span className="text-xs font-bold">☀️ Light Backdrop</span>
+                      <span className="text-[9px] mt-1 leading-normal opacity-70">
+                        Translucent whitish background for light desktops.
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Opacity slider */}
+                <div className="space-y-1.5">
+                  <div className="flex justify-between items-center text-[10px] font-bold text-muted uppercase tracking-wider">
+                    <span>Backdrop Opacity</span>
+                    <span className="font-mono text-primary text-xs">{Math.round(opacity * 100)}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0.05"
+                    max="1.00"
+                    step="0.05"
+                    value={opacity}
+                    onChange={(e) => setOpacity(parseFloat(e.target.value))}
+                    className="w-full h-1.5 bg-black/25 rounded-lg appearance-none cursor-pointer accent-blue-500 border border-white/10"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 2: WELCOME (Formerly Step 1) */}
+          {step === 2 && (
+            <div className="space-y-4 animate-fadeIn">
+              <div className="flex items-center gap-2">
                 <Sparkles className="w-6 h-6 text-yellow-400 animate-pulse" />
-                <h1 className="text-lg font-extrabold text-gray-800 tracking-tight">
+                <h1 className="text-lg font-extrabold text-primary tracking-tight">
                   Welcome to CorvusX
                 </h1>
               </div>
-              <p className="text-xs text-gray-600 leading-relaxed font-medium">
+              <p className="text-xs text-secondary leading-relaxed font-medium">
                 Intelligence in the shadows. A premium, always-on-top overlay providing real-time cognitive reasoning, screen analysis, and meeting insights.
               </p>
               <div className="space-y-2 pt-2 border-t border-white/10">
                 <div className="flex items-start gap-2.5">
-                  <div className="w-5 h-5 rounded-full bg-white/25 flex items-center justify-center mt-0.5 border border-white/30">
-                    <span className="text-[10px] text-gray-700">🕵️</span>
+                  <div className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center mt-0.5 border border-white/20">
+                    <span className="text-[10px] text-primary">🕵️</span>
                   </div>
                   <div>
-                    <h3 className="text-xs font-semibold text-gray-700">Stealth HUD Overlay</h3>
-                    <p className="text-[10px] text-gray-500">Sits invisibly above your active screen, accessible only to you via fast hotkeys.</p>
+                    <h3 className="text-xs font-semibold text-primary">Stealth HUD Overlay</h3>
+                    <p className="text-[10px] text-muted">Sits silently above all your apps, invisibly, and helps you.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2.5">
-                  <div className="w-5 h-5 rounded-full bg-white/25 flex items-center justify-center mt-0.5 border border-white/30">
-                    <span className="text-[10px] text-gray-700">🔍</span>
+                  <div className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center mt-0.5 border border-white/20">
+                    <span className="text-[10px] text-primary">🔍</span>
                   </div>
                   <div>
-                    <h3 className="text-xs font-semibold text-gray-700">Multimodal Intelligence</h3>
-                    <p className="text-[10px] text-gray-500">Instantly extracts problems from screenshots or processes voice transcription clips.</p>
+                    <h3 className="text-xs font-semibold text-primary">Multimodal Intelligence</h3>
+                    <p className="text-[10px] text-muted">Instantly extracts problems from screenshots or processes voice transcription clips.</p>
                   </div>
                 </div>
               </div>
             </div>
           )}
 
-          {/* STEP 2: PROVIDER & API KEY */}
-          {step === 2 && (
+          {/* STEP 3: PROVIDER & API KEY (Formerly Step 2) */}
+          {step === 3 && (
             <div className="space-y-3.5 animate-fadeIn">
               <div className="flex items-center gap-2">
-                <Key className="w-5 h-5 text-blue-500" />
-                <h1 className="text-lg font-bold text-gray-800 tracking-tight">
+                <Key className="w-5 h-5 text-blue-400" />
+                <h1 className="text-lg font-bold text-primary tracking-tight">
                   Configure AI Provider
                 </h1>
               </div>
               
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">
+                <label className="text-[10px] font-bold text-muted uppercase tracking-wider block">
                   Select Provider
                 </label>
                 <div className="grid grid-cols-2 gap-3">
@@ -196,16 +281,16 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
                       setHasTestedSuccessfully(false)
                       setTestStatus("idle")
                     }}
-                    className={`p-2.5 rounded-xl border text-left flex flex-col justify-between transition-all duration-200 ${
+                    className={`p-2.5 rounded-xl border text-left flex flex-col justify-between transition-all duration-200 cursor-pointer ${
                       provider === "gemini"
                         ? "bg-white/85 border-blue-500/50 shadow-md ring-1 ring-blue-500/20 text-gray-800"
-                        : "bg-white/10 border-white/20 text-gray-600 hover:bg-white/20"
+                        : "bg-white/10 border-white/25 text-primary hover:bg-white/20"
                     }`}
                   >
                     <span className="text-xs font-bold flex items-center gap-1.5">
                       ☁️ Google Gemini
                     </span>
-                    <span className="text-[9px] text-gray-500 mt-1 leading-normal">
+                    <span className="text-[9px] mt-1 leading-normal opacity-70">
                       Direct cloud connection via Google AI Studio.
                     </span>
                   </button>
@@ -218,16 +303,16 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
                       setHasTestedSuccessfully(false)
                       setTestStatus("idle")
                     }}
-                    className={`p-2.5 rounded-xl border text-left flex flex-col justify-between transition-all duration-200 ${
+                    className={`p-2.5 rounded-xl border text-left flex flex-col justify-between transition-all duration-200 cursor-pointer ${
                       provider === "omnikey"
                         ? "bg-white/85 border-purple-500/50 shadow-md ring-1 ring-purple-500/20 text-gray-800"
-                        : "bg-white/10 border-white/20 text-gray-600 hover:bg-white/20"
+                        : "bg-white/10 border-white/25 text-primary hover:bg-white/20"
                     }`}
                   >
                     <span className="text-xs font-bold flex items-center gap-1.5">
                       🔑 OmniKey Proxy
                     </span>
-                    <span className="text-[9px] text-gray-500 mt-1 leading-normal">
+                    <span className="text-[9px] mt-1 leading-normal opacity-70">
                       Reverse LLM proxy created by felix-au.
                     </span>
                   </button>
@@ -237,7 +322,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
               {/* API Key input */}
               <div className="space-y-1">
                 <div className="flex justify-between items-center">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                  <label className="text-[10px] font-bold text-muted uppercase tracking-wider">
                     API Key
                   </label>
                   {provider === "gemini" && (
@@ -245,7 +330,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
                       href="https://aistudio.google.com/app/apikey" 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="text-[9px] text-blue-500 hover:underline flex items-center gap-0.5 interactive"
+                      className="text-[9px] text-blue-400 hover:underline flex items-center gap-0.5 interactive"
                     >
                       Get free Gemini API Key &rarr;
                     </a>
@@ -265,12 +350,12 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
                       setHasTestedSuccessfully(false)
                       setTestStatus("idle")
                     }}
-                    className="w-full pl-3 pr-10 py-2 bg-white/40 border border-white/60 rounded-lg text-xs text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/60 transition-all font-mono"
+                    className="w-full pl-3 pr-10 py-2 bg-white/20 border border-white/40 rounded-lg text-xs text-primary placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/60 transition-all font-mono"
                   />
                   <button
                     type="button"
                     onClick={() => setShowApiKey(p => !p)}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-800 cursor-pointer p-0.5 rounded transition-colors"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-primary opacity-60 hover:opacity-90 cursor-pointer p-0.5 rounded transition-colors"
                   >
                     {showApiKey ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                   </button>
@@ -283,19 +368,19 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
                   type="button"
                   onClick={handleTestConnection}
                   disabled={isTesting || !apiKey.trim()}
-                  className="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400/50 text-white font-bold text-xs rounded-lg transition-all shadow-md flex items-center gap-1.5"
+                  className="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400/50 text-white font-bold text-xs rounded-lg transition-all shadow-md flex items-center gap-1.5 cursor-pointer"
                 >
                   {isTesting ? "Testing..." : "Test Connection"}
                 </button>
                 
                 <div className="flex-1 text-[10px] font-semibold truncate">
                   {testStatus === "success" && (
-                    <span className="text-green-600 flex items-center gap-1">
+                    <span className="text-green-500 flex items-center gap-1 font-bold">
                       <Check className="w-3.5 h-3.5" /> Connected Successfully!
                     </span>
                   )}
                   {testStatus === "error" && (
-                    <span className="text-red-500 flex items-start gap-0.5 break-all max-w-[280px]">
+                    <span className="text-red-400 flex items-start gap-0.5 break-all max-w-[280px]">
                       <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" /> {errorMessage}
                     </span>
                   )}
@@ -304,17 +389,17 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
             </div>
           )}
 
-          {/* STEP 3: SELECT ASSISTANT MODE */}
-          {step === 3 && (
+          {/* STEP 4: SELECT ASSISTANT MODE (Formerly Step 3) */}
+          {step === 4 && (
             <div className="space-y-4 animate-fadeIn">
               <div className="flex items-center gap-2">
-                <Laptop className="w-5 h-5 text-purple-500" />
-                <h1 className="text-lg font-bold text-gray-800 tracking-tight">
+                <Laptop className="w-5 h-5 text-purple-400" />
+                <h1 className="text-lg font-bold text-primary tracking-tight">
                   Choose Assistant Mode
                 </h1>
               </div>
 
-              <p className="text-xs text-gray-600 leading-relaxed">
+              <p className="text-xs text-secondary leading-relaxed">
                 Choose the primary style for your Wingman AI. You can switch modes instantly at any time from the HUD overlay.
               </p>
 
@@ -324,18 +409,18 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
                   onClick={() => setMode("code")}
                   className={`p-3 rounded-xl border cursor-pointer transition-all duration-200 ${
                     mode === "code"
-                      ? "bg-white/85 border-blue-500/50 shadow-md ring-1 ring-blue-500/20"
-                      : "bg-white/10 border-white/20 hover:bg-white/20"
+                      ? "bg-white/85 border-blue-500/50 shadow-md ring-1 ring-blue-500/20 text-gray-800"
+                      : "bg-white/10 border-white/20 text-primary hover:bg-white/20"
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-gray-800 flex items-center gap-1.5">
+                    <span className="text-xs font-bold flex items-center gap-1.5">
                       💻 Code Assistant (Default &amp; Recommended)
                     </span>
                     {mode === "code" && <div className="w-2.5 h-2.5 bg-blue-500 rounded-full" />}
                   </div>
-                  <p className="text-[10px] text-gray-600 mt-1 leading-normal">
-                    Perfect for coding interviews or debugging. Wingman replies with **only pure, clean, ready-to-use code** and zero conversational fluff.
+                  <p className="text-[10px] mt-1 leading-normal opacity-85">
+                    Designed for coding interviews or solving technical programming questions. Returns direct, concise, production-ready code with no fluff.
                   </p>
                 </div>
 
@@ -344,34 +429,34 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
                   onClick={() => setMode("general")}
                   className={`p-3 rounded-xl border cursor-pointer transition-all duration-200 ${
                     mode === "general"
-                      ? "bg-white/85 border-purple-500/50 shadow-md ring-1 ring-purple-500/20"
-                      : "bg-white/10 border-white/20 hover:bg-white/20"
+                      ? "bg-white/85 border-purple-500/50 shadow-md ring-1 ring-purple-500/20 text-gray-800"
+                      : "bg-white/10 border-white/20 text-primary hover:bg-white/20"
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-gray-800 flex items-center gap-1.5">
+                    <span className="text-xs font-bold flex items-center gap-1.5">
                       🌟 General Assistant
                     </span>
                     {mode === "general" && <div className="w-2.5 h-2.5 bg-purple-500 rounded-full" />}
                   </div>
-                  <p className="text-[10px] text-gray-600 mt-1 leading-normal">
-                    Ideal for general meetings or conversations. Wingman replies with direct, highly concise paragraphs and actionable outlines.
+                  <p className="text-[10px] mt-1 leading-normal opacity-85">
+                    Designed for general meetings, summaries, or daily tasks. Returns direct, concise, conversational replies in a single brief paragraph.
                   </p>
                 </div>
               </div>
             </div>
           )}
 
-          {/* STEP 4: CONTROLS & SHORTCUTS */}
-          {step === 4 && (
+          {/* STEP 5: CONTROLS & SHORTCUTS (Formerly Step 4) */}
+          {step === 5 && (
             <div className="space-y-3.5 animate-fadeIn">
               <div className="flex items-center gap-2">
-                <Command className="w-5 h-5 text-gray-700" />
-                <h1 className="text-lg font-bold text-gray-800 tracking-tight">
+                <Command className="w-5 h-5 text-primary" />
+                <h1 className="text-lg font-bold text-primary tracking-tight">
                   Master the Shortcuts
                 </h1>
               </div>
-              <p className="text-xs text-gray-600">
+              <p className="text-xs text-secondary">
                 CorvusX sits silently in the background. Memorize these key global shortcuts to activate and use it in stealth mode:
               </p>
 
@@ -379,72 +464,73 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
                 {/* Shortcut 1 */}
                 <div className="flex items-center justify-between p-2 rounded-lg bg-white/10 border border-white/15">
                   <div className="text-[10px]">
-                    <span className="font-bold text-gray-800 block">Show / Center Overlay</span>
-                    <span className="text-gray-500">Center overlay window on active workspace.</span>
+                    <span className="font-bold text-primary block">Show / Center Overlay</span>
+                    <span className="text-secondary opacity-80">Center overlay window on active workspace.</span>
                   </div>
                   <div className="flex gap-1">
-                    <kbd className="px-1.5 py-0.5 bg-white/30 rounded text-[9px] font-mono shadow-sm">⌘/Ctrl</kbd>
-                    <kbd className="px-1.5 py-0.5 bg-white/30 rounded text-[9px] font-mono shadow-sm">Shift</kbd>
-                    <kbd className="px-1.5 py-0.5 bg-white/30 rounded text-[9px] font-mono shadow-sm">Space</kbd>
+                    <kbd className="px-1.5 py-0.5 bg-white/30 rounded text-[9px] font-mono shadow-sm text-primary">⌘/Ctrl</kbd>
+                    <kbd className="px-1.5 py-0.5 bg-white/30 rounded text-[9px] font-mono shadow-sm text-primary">Shift</kbd>
+                    <kbd className="px-1.5 py-0.5 bg-white/30 rounded text-[9px] font-mono shadow-sm text-primary">Space</kbd>
                   </div>
                 </div>
 
                 {/* Shortcut 2 */}
                 <div className="flex items-center justify-between p-2 rounded-lg bg-white/10 border border-white/15">
                   <div className="text-[10px]">
-                    <span className="font-bold text-gray-800 block">Stealth Show / Hide</span>
-                    <span className="text-gray-500">Silently toggle window visibility.</span>
+                    <span className="font-bold text-primary block">Stealth Show / Hide</span>
+                    <span className="text-secondary opacity-80">Silently toggle window visibility.</span>
                   </div>
                   <div className="flex gap-1">
-                    <kbd className="px-1.5 py-0.5 bg-white/30 rounded text-[9px] font-mono shadow-sm">⌘/Ctrl</kbd>
-                    <kbd className="px-1.5 py-0.5 bg-white/30 rounded text-[9px] font-mono shadow-sm">B</kbd>
+                    <kbd className="px-1.5 py-0.5 bg-white/30 rounded text-[9px] font-mono shadow-sm text-primary">⌘/Ctrl</kbd>
+                    <kbd className="px-1.5 py-0.5 bg-white/30 rounded text-[9px] font-mono shadow-sm text-primary">B</kbd>
                   </div>
                 </div>
 
                 {/* Shortcut 3 */}
                 <div className="flex items-center justify-between p-2 rounded-lg bg-white/10 border border-white/15">
                   <div className="text-[10px]">
-                    <span className="font-bold text-gray-800 block">Screenshot Analysis</span>
-                    <span className="text-gray-500">Capture current screen and analyze immediately.</span>
+                    <span className="font-bold text-primary block">Screenshot Analysis</span>
+                    <span className="text-secondary opacity-80">Capture current screen and analyze immediately.</span>
                   </div>
                   <div className="flex gap-1">
-                    <kbd className="px-1.5 py-0.5 bg-white/30 rounded text-[9px] font-mono shadow-sm">⌘/Ctrl</kbd>
-                    <kbd className="px-1.5 py-0.5 bg-white/30 rounded text-[9px] font-mono shadow-sm">H</kbd>
+                    <kbd className="px-1.5 py-0.5 bg-white/30 rounded text-[9px] font-mono shadow-sm text-primary">⌘/Ctrl</kbd>
+                    <kbd className="px-1.5 py-0.5 bg-white/30 rounded text-[9px] font-mono shadow-sm text-primary">H</kbd>
                   </div>
                 </div>
 
                 {/* Shortcut 4 */}
                 <div className="flex items-center justify-between p-2 rounded-lg bg-white/10 border border-white/15">
                   <div className="text-[10px]">
-                    <span className="font-bold text-gray-800 block">Reset &amp; Clear Context</span>
-                    <span className="text-gray-500">Start a completely fresh chat session.</span>
+                    <span className="font-bold text-primary block">Reset &amp; Clear Context</span>
+                    <span className="text-secondary opacity-80">Start a completely fresh chat session.</span>
                   </div>
                   <div className="flex gap-1">
-                    <kbd className="px-1.5 py-0.5 bg-white/30 rounded text-[9px] font-mono shadow-sm">⌘/Ctrl</kbd>
-                    <kbd className="px-1.5 py-0.5 bg-white/30 rounded text-[9px] font-mono shadow-sm">O</kbd>
+                    <kbd className="px-1.5 py-0.5 bg-white/30 rounded text-[9px] font-mono shadow-sm text-primary">⌘/Ctrl</kbd>
+                    <kbd className="px-1.5 py-0.5 bg-white/30 rounded text-[9px] font-mono shadow-sm text-primary">O</kbd>
                   </div>
                 </div>
               </div>
             </div>
           )}
 
-          {/* STEP 5: READY */}
-          {step === 5 && (
+          {/* STEP 6: READY (Formerly Step 5) */}
+          {step === 6 && (
             <div className="space-y-4 text-center animate-fadeIn">
               <div className="w-12 h-12 bg-green-500/10 rounded-full flex items-center justify-center mx-auto border border-green-500/20">
-                <Check className="w-6 h-6 text-green-600" />
+                <Check className="w-6 h-6 text-green-500" />
               </div>
-              <h1 className="text-lg font-bold text-gray-800">
+              <h1 className="text-lg font-bold text-primary">
                 You're Ready to Go!
               </h1>
-              <p className="text-xs text-gray-600 leading-relaxed max-w-sm mx-auto">
-                All settings have been successfully configured. CorvusX will now sit silently in the background. Press <kbd className="px-1 py-0.5 bg-black/10 rounded text-[9px] font-mono">⌘/Ctrl+B</kbd> at any time to toggle the overlay.
+              <p className="text-xs text-secondary leading-relaxed max-w-sm mx-auto">
+                All settings have been successfully configured. CorvusX will now sit silently in the background. Press <kbd className="px-1 py-0.5 bg-black/10 rounded text-[9px] font-mono text-primary">⌘/Ctrl+B</kbd> at any time to toggle the overlay.
               </p>
               
               <div className="p-3 bg-white/10 rounded-xl border border-white/20 inline-block text-left text-[10px] space-y-1 mx-auto max-w-sm">
-                <div>🎯 <strong>Initial Mode:</strong> {mode === "code" ? "Code Assistant" : "General Assistant"}</div>
-                <div>📡 <strong>Provider:</strong> {provider === "gemini" ? "Google Gemini" : "OmniKey"}</div>
-                <div className="text-[9px] text-gray-500 italic mt-1 text-center">Settings saved in config.json</div>
+                <div className="text-primary">🎯 <strong>Initial Mode:</strong> {mode === "code" ? "Code Assistant" : "General Assistant"}</div>
+                <div className="text-primary">📡 <strong>Provider:</strong> {provider === "gemini" ? "Google Gemini" : "OmniKey"}</div>
+                <div className="text-primary">🎨 <strong>Theme:</strong> {theme === "light" ? "Light Backdrop" : "Dark Backdrop"} ({Math.round(opacity * 100)}% Opacity)</div>
+                <div className="text-muted italic mt-1 text-center">Settings saved in config.json</div>
               </div>
             </div>
           )}
@@ -457,7 +543,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
             <button
               type="button"
               onClick={handleBack}
-              className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-gray-700 font-semibold text-xs rounded-lg transition-all border border-white/20 flex items-center gap-1 cursor-pointer"
+              className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-primary font-semibold text-xs rounded-lg transition-all border border-white/20 flex items-center gap-1 cursor-pointer"
             >
               <ArrowLeft className="w-3.5 h-3.5" /> Back
             </button>
@@ -465,11 +551,11 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
             <div />
           )}
 
-          {step < 5 ? (
+          {step < 6 ? (
             <button
               type="button"
               onClick={handleNext}
-              disabled={step === 2 && !hasTestedSuccessfully}
+              disabled={step === 3 && !hasTestedSuccessfully}
               className="px-4 py-1.5 bg-gray-700 hover:bg-gray-800 disabled:bg-gray-400 text-white font-bold text-xs rounded-lg transition-all shadow-md flex items-center gap-1 cursor-pointer"
             >
               Next <ArrowRight className="w-3.5 h-3.5" />
