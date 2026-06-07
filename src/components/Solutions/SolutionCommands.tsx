@@ -4,11 +4,13 @@ import { IoLogOutOutline } from "react-icons/io5"
 interface SolutionCommandsProps {
   extraScreenshots: any[]
   onTooltipVisibilityChange?: (visible: boolean, height: number) => void
+  theme?: "light" | "dark"
 }
 
 const SolutionCommands: React.FC<SolutionCommandsProps> = ({
   extraScreenshots,
-  onTooltipVisibilityChange
+  onTooltipVisibilityChange,
+  theme = "dark"
 }) => {
   const [isTooltipVisible, setIsTooltipVisible] = useState(false)
   const tooltipRef = useRef<HTMLDivElement>(null)
@@ -34,15 +36,15 @@ const SolutionCommands: React.FC<SolutionCommandsProps> = ({
   return (
     <div>
       <div className="pt-2 w-fit">
-        <div className="text-xs text-white/90 backdrop-blur-md bg-black/60 rounded-lg py-2 px-4 flex items-center justify-center gap-4">
+        <div className="text-xs text-primary liquid-glass-bar py-1 px-4 flex items-center justify-center gap-4 draggable-area">
           {/* Show/Hide */}
           <div className="flex items-center gap-2 whitespace-nowrap">
-            <span className="text-[11px] leading-none">Show/Hide</span>
+            <span className="text-[11px] leading-none text-secondary">Show/Hide</span>
             <div className="flex gap-1">
-              <button className="bg-white/10 hover:bg-white/20 transition-colors rounded-md px-1.5 py-1 text-[11px] leading-none text-white/70">
+              <button className="bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 border border-black/10 dark:border-white/10 transition-colors rounded-md px-1.5 py-1 text-[11px] leading-none text-primary">
                 ⌘
               </button>
-              <button className="bg-white/10 hover:bg-white/20 transition-colors rounded-md px-1.5 py-1 text-[11px] leading-none text-white/70">
+              <button className="bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 border border-black/10 dark:border-white/10 transition-colors rounded-md px-1.5 py-1 text-[11px] leading-none text-primary">
                 B
               </button>
             </div>
@@ -50,28 +52,28 @@ const SolutionCommands: React.FC<SolutionCommandsProps> = ({
 
           {/* Screenshot */}
           <div className="flex items-center gap-2 whitespace-nowrap">
-            <span className="text-[11px] leading-none truncate">
+            <span className="text-[11px] leading-none text-secondary truncate">
               {extraScreenshots.length === 0
                 ? "Screenshot your code"
                 : "Screenshot"}
             </span>
             <div className="flex gap-1">
-              <button className="bg-white/10 hover:bg-white/20 transition-colors rounded-md px-1.5 py-1 text-[11px] leading-none text-white/70">
+              <button className="bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 border border-black/10 dark:border-white/10 transition-colors rounded-md px-1.5 py-1 text-[11px] leading-none text-primary">
                 ⌘
               </button>
-              <button className="bg-white/10 hover:bg-white/20 transition-colors rounded-md px-1.5 py-1 text-[11px] leading-none text-white/70">
+              <button className="bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 border border-black/10 dark:border-white/10 transition-colors rounded-md px-1.5 py-1 text-[11px] leading-none text-primary">
                 H
               </button>
             </div>
           </div>
           {extraScreenshots.length > 0 && (
             <div className="flex items-center gap-2 whitespace-nowrap">
-              <span className="text-[11px] leading-none">Debug</span>
+              <span className="text-[11px] leading-none text-secondary">Debug</span>
               <div className="flex gap-1">
-                <button className="bg-white/10 hover:bg-white/20 transition-colors rounded-md px-1.5 py-1 text-[11px] leading-none text-white/70">
+                <button className="bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 border border-black/10 dark:border-white/10 transition-colors rounded-md px-1.5 py-1 text-[11px] leading-none text-primary">
                   ⌘
                 </button>
-                <button className="bg-white/10 hover:bg-white/20 transition-colors rounded-md px-1.5 py-1 text-[11px] leading-none text-white/70">
+                <button className="bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 border border-black/10 dark:border-white/10 transition-colors rounded-md px-1.5 py-1 text-[11px] leading-none text-primary">
                   ↵
                 </button>
               </div>
@@ -80,12 +82,12 @@ const SolutionCommands: React.FC<SolutionCommandsProps> = ({
 
           {/* Start Over */}
           <div className="flex items-center gap-2 whitespace-nowrap">
-            <span className="text-[11px] leading-none">Start over</span>
+            <span className="text-[11px] leading-none text-secondary">Start over</span>
             <div className="flex gap-1">
-              <button className="bg-white/10 hover:bg-white/20 transition-colors rounded-md px-1.5 py-1 text-[11px] leading-none text-white/70">
+              <button className="bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 border border-black/10 dark:border-white/10 transition-colors rounded-md px-1.5 py-1 text-[11px] leading-none text-primary">
                 ⌘
               </button>
-              <button className="bg-white/10 hover:bg-white/20 transition-colors rounded-md px-1.5 py-1 text-[11px] leading-none text-white/70">
+              <button className="bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 border border-black/10 dark:border-white/10 transition-colors rounded-md px-1.5 py-1 text-[11px] leading-none text-primary">
                 R
               </button>
             </div>
@@ -98,8 +100,8 @@ const SolutionCommands: React.FC<SolutionCommandsProps> = ({
             onMouseLeave={handleMouseLeave}
           >
             {/* Question mark circle */}
-            <div className="w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-colors flex items-center justify-center cursor-help z-10">
-              <span className="text-xs text-white/70">?</span>
+            <div className="w-6 h-6 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 border border-black/10 dark:border-white/10 backdrop-blur-sm transition-colors flex items-center justify-center cursor-help z-10">
+              <span className="text-xs text-primary font-bold">?</span>
             </div>
 
             {/* Tooltip Content */}
@@ -200,7 +202,7 @@ const SolutionCommands: React.FC<SolutionCommandsProps> = ({
 
           {/* Sign Out Button */}
           <button
-            className="text-red-500/70 hover:text-red-500/90 transition-colors hover:cursor-pointer"
+            className="text-red-600/70 dark:text-red-500/70 hover:text-red-600 dark:hover:text-red-500 hover:scale-105 transition-all hover:cursor-pointer"
             title="Sign Out"
             onClick={() => window.electronAPI.quitApp()}
           >
