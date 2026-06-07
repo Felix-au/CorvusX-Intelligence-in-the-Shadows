@@ -205,4 +205,38 @@ export function initializeIpcHandlers(appState: AppState): void {
       return { success: false, error: error.message };
     }
   });
+
+  ipcMain.handle("get-onboarding-status", async () => {
+    try {
+      const config = appState.configHelper.loadConfig();
+      return config.onboardingCompleted;
+    } catch (error: any) {
+      console.error("Error getting onboarding status:", error);
+      return false;
+    }
+  });
+
+  ipcMain.handle("complete-onboarding", async (_, apiKey: string, provider: 'gemini' | 'omnikey', model: string, mode: 'code' | 'general') => {
+    try {
+      const llmHelper = appState.processingHelper.getLLMHelper();
+      
+      // Update config file
+      appState.configHelper.updateConfig({
+        onboardingCompleted: true,
+        apiKey,
+        provider,
+        model,
+        mode
+      });
+
+      // Switch in memory
+      await llmHelper.switchToGemini(apiKey, model);
+      llmHelper.setMode(mode);
+
+      return { success: true };
+    } catch (error: any) {
+      console.error("Error completing onboarding:", error);
+      return { success: false, error: error.message };
+    }
+  });
 }
