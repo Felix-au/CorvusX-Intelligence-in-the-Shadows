@@ -47,6 +47,12 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete, 
     root.style.setProperty("--text-color-muted", theme === "light" ? "#374151" : "#9ca3af")
     root.style.setProperty("--border-color", theme === "light" ? "rgba(0, 0, 0, 0.12)" : "rgba(255, 255, 255, 0.15)")
     
+    if (theme === 'dark') {
+      root.classList.add('dark')
+    } else {
+      root.classList.remove('dark')
+    }
+
     if (onStyleChange) {
       onStyleChange(theme, opacity)
     }

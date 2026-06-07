@@ -97,6 +97,14 @@ const App: React.FC = () => {
     checkOnboarding()
   }, [isOnboardingActive])
 
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+  }, [theme])
+
   // Effect for height monitoring
   useEffect(() => {
     const cleanup = window.electronAPI.onResetView(() => {
