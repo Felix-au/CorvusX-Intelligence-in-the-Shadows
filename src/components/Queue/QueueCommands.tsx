@@ -14,6 +14,7 @@ interface QueueCommandsProps {
   chatMessagesCount: number
   mode: 'code' | 'general'
   onModeToggle: () => void
+  theme: 'light' | 'dark'
 }
 
 const QueueCommands: React.FC<QueueCommandsProps> = ({
@@ -26,7 +27,8 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
   onClearAll,
   chatMessagesCount,
   mode,
-  onModeToggle
+  onModeToggle,
+  theme
 }) => {
   const [isTooltipVisible, setIsTooltipVisible] = useState(false)
   const tooltipRef = useRef<HTMLDivElement>(null)
@@ -91,15 +93,15 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
 
   return (
     <div className="w-fit">
-      <div className="text-xs text-white/90 liquid-glass-bar py-1 px-4 flex items-center justify-center gap-4 draggable-area">
+      <div className="text-xs text-primary liquid-glass-bar py-1 px-4 flex items-center justify-center gap-4 draggable-area">
         {/* Show/Hide */}
         <div className="flex items-center gap-2">
-          <span className="text-[11px] leading-none">Show/Hide</span>
+          <span className="text-[11px] leading-none text-secondary">Show/Hide</span>
           <div className="flex gap-1">
-            <button className="bg-white/10 hover:bg-white/20 transition-colors rounded-md px-1.5 py-1 text-[11px] leading-none text-white/70">
+            <button className="bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 border border-black/10 dark:border-white/10 transition-colors rounded-md px-1.5 py-1 text-[11px] leading-none text-primary">
               ⌘
             </button>
-            <button className="bg-white/10 hover:bg-white/20 transition-colors rounded-md px-1.5 py-1 text-[11px] leading-none text-white/70">
+            <button className="bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 border border-black/10 dark:border-white/10 transition-colors rounded-md px-1.5 py-1 text-[11px] leading-none text-primary">
               B
             </button>
           </div>
@@ -108,12 +110,12 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
         {/* Voice Recording Button */}
         <div className="flex items-center gap-2">
           <button
-            className={`bg-white/10 hover:bg-white/20 transition-colors rounded-md px-2 py-1 text-[11px] leading-none text-white/70 flex items-center gap-1 ${isRecording ? 'bg-red-500/70 hover:bg-red-500/90' : ''}`}
+            className={`bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 border border-black/10 dark:border-white/10 transition-colors rounded-md px-2 py-1 text-[11px] leading-none text-primary flex items-center gap-1 ${isRecording ? 'bg-red-500/70 dark:bg-red-500/70 hover:bg-red-500/90 dark:hover:bg-red-500/90 text-white' : ''}`}
             onClick={handleRecordClick}
             type="button"
           >
             {isRecording ? (
-              <span className="animate-pulse">● Stop Recording</span>
+              <span className="animate-pulse text-white">● Stop Recording</span>
             ) : (
               <span>🎤 Record Voice</span>
             )}
@@ -123,7 +125,7 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
         {/* Chat Button */}
         <div className="flex items-center gap-2">
           <button
-            className="bg-white/10 hover:bg-white/20 transition-colors rounded-md px-2 py-1 text-[11px] leading-none text-white/70 flex items-center gap-1"
+            className="bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 border border-black/10 dark:border-white/10 transition-colors rounded-md px-2 py-1 text-[11px] leading-none text-primary flex items-center gap-1"
             onClick={onChatToggle}
             type="button"
           >
@@ -135,9 +137,13 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
         <div className="flex items-center gap-2">
           <button
             className={`transition-all duration-200 rounded-md px-2 py-1 text-[11px] leading-none flex items-center gap-1 cursor-pointer ${
-              mode === 'code' 
-                ? 'bg-blue-500/20 hover:bg-blue-500/30 text-blue-200 border border-blue-500/30' 
-                : 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-200 border border-purple-500/30'
+              theme === 'light'
+                ? mode === 'code'
+                  ? 'bg-blue-600/10 hover:bg-blue-600/20 text-blue-900 border border-blue-600/30 font-semibold'
+                  : 'bg-purple-600/10 hover:bg-purple-600/20 text-purple-900 border border-purple-600/30 font-semibold'
+                : mode === 'code' 
+                  ? 'bg-blue-500/20 hover:bg-blue-500/30 text-blue-200 border border-blue-500/30' 
+                  : 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-200 border border-purple-500/30'
             }`}
             onClick={onModeToggle}
             type="button"
@@ -150,7 +156,7 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
         {/* Settings Button */}
         <div className="flex items-center gap-2">
           <button
-            className="bg-white/10 hover:bg-white/20 transition-colors rounded-md px-2 py-1 text-[11px] leading-none text-white/70 flex items-center gap-1"
+            className="bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 border border-black/10 dark:border-white/10 transition-colors rounded-md px-2 py-1 text-[11px] leading-none text-primary flex items-center gap-1"
             onClick={onSettingsToggle}
             type="button"
             title="Toggle Settings and AI Models (Ctrl+I)"
@@ -163,7 +169,7 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
         {(audioResult || chatMessagesCount > 0) && (
           <div className="flex items-center gap-2">
             <button
-              className="bg-white/10 hover:bg-red-500/20 border border-white/10 hover:border-red-500/30 transition-all rounded-md px-2 py-1 text-[11px] leading-none text-white/70 flex items-center gap-1"
+              className="bg-black/5 dark:bg-white/10 hover:bg-red-500/20 dark:hover:bg-red-500/20 border border-black/10 dark:border-white/10 hover:border-red-500/30 dark:hover:border-red-500/30 transition-all rounded-md px-2 py-1 text-[11px] leading-none text-primary flex items-center gap-1"
               onClick={onClearAll}
               type="button"
               title="Clear audio results and chat messages (Ctrl+U)"
@@ -173,17 +179,14 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
           </div>
         )}
 
-        {/* Add this button in the main button row, before the separator and sign out */}
-        {/* Remove the Chat button */}
-
         {/* Question mark with tooltip */}
         <div
           className="relative inline-block"
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
         >
-          <div className="w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-colors flex items-center justify-center cursor-help z-10">
-            <span className="text-xs text-white/70">?</span>
+          <div className="w-6 h-6 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 border border-black/10 dark:border-white/10 backdrop-blur-sm transition-colors flex items-center justify-center cursor-help z-10">
+            <span className="text-xs text-primary font-bold">?</span>
           </div>
 
           {/* Tooltip Content */}
@@ -311,11 +314,11 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
         </div>
 
         {/* Separator */}
-        <div className="mx-2 h-4 w-px bg-white/20" />
+        <div className="mx-2 h-4 w-px bg-black/10 dark:bg-white/20" />
 
         {/* Sign Out Button - Moved to end */}
         <button
-          className="text-red-500/70 hover:text-red-500/90 transition-colors hover:cursor-pointer"
+          className="text-red-600/70 dark:text-red-500/70 hover:text-red-600 dark:hover:text-red-500 hover:scale-105 transition-all hover:cursor-pointer"
           title="Sign Out"
           onClick={() => window.electronAPI.quitApp()}
         >
@@ -324,13 +327,11 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
       </div>
       {/* Audio Result Display */}
       {audioResult && (
-        <div className="mt-2 p-2 bg-white/10 rounded text-white text-xs max-w-md">
+        <div className="mt-2 p-2 bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/10 rounded text-primary text-xs max-w-md">
           <span className="font-semibold block mb-1">Audio Result:</span>
           <div>{renderMarkdown(audioResult)}</div>
         </div>
       )}
-      {/* Chat Dialog Overlay */}
-      {/* Remove the Dialog component */}
     </div>
   )
 }
