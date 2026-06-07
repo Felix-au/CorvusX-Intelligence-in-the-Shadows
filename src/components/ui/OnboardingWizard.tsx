@@ -340,6 +340,16 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete, 
                       Get free Gemini API Key &rarr;
                     </a>
                   )}
+                  {provider === "omnikey" && (
+                    <a 
+                      href="https://omni-key-ai.vercel.app/" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-[9px] text-blue-400 hover:underline flex items-center gap-0.5 interactive"
+                    >
+                      Get free OmniKey Key &rarr;
+                    </a>
+                  )}
                 </div>
                 <div className="relative">
                   <input
@@ -503,7 +513,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete, 
                   </div>
                 </div>
 
-                {/* Shortcut 4 */}
+                 {/* Shortcut 4 */}
                 <div className="flex items-center justify-between p-2 rounded-lg bg-white/10 border border-white/15">
                   <div className="text-[10px]">
                     <span className="font-bold text-primary block">Reset &amp; Clear Context</span>
@@ -512,6 +522,18 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete, 
                   <div className="flex gap-1">
                     <kbd className="px-1.5 py-0.5 bg-white/30 rounded text-[9px] font-mono shadow-sm text-primary">⌘/Ctrl</kbd>
                     <kbd className="px-1.5 py-0.5 bg-white/30 rounded text-[9px] font-mono shadow-sm text-primary">O</kbd>
+                  </div>
+                </div>
+
+                {/* Shortcut 5 */}
+                <div className="flex items-center justify-between p-2 rounded-lg bg-white/10 border border-white/15">
+                  <div className="text-[10px]">
+                    <span className="font-bold text-primary block">Clear UI Clutter</span>
+                    <span className="text-secondary opacity-80">Clear chat and audio results from UI (retains context).</span>
+                  </div>
+                  <div className="flex gap-1">
+                    <kbd className="px-1.5 py-0.5 bg-white/30 rounded text-[9px] font-mono shadow-sm text-primary">⌘/Ctrl</kbd>
+                    <kbd className="px-1.5 py-0.5 bg-white/30 rounded text-[9px] font-mono shadow-sm text-primary">U</kbd>
                   </div>
                 </div>
               </div>
