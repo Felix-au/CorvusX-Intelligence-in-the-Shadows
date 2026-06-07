@@ -12,6 +12,8 @@ interface QueueCommandsProps {
   setAudioResult: React.Dispatch<React.SetStateAction<string | null>>
   onClearAll: () => void
   chatMessagesCount: number
+  mode: 'code' | 'general'
+  onModeToggle: () => void
 }
 
 const QueueCommands: React.FC<QueueCommandsProps> = ({
@@ -22,7 +24,9 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
   audioResult,
   setAudioResult,
   onClearAll,
-  chatMessagesCount
+  chatMessagesCount,
+  mode,
+  onModeToggle
 }) => {
   const [isTooltipVisible, setIsTooltipVisible] = useState(false)
   const tooltipRef = useRef<HTMLDivElement>(null)
@@ -124,6 +128,22 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
             type="button"
           >
             💬 Chat
+          </button>
+        </div>
+
+        {/* Mode Toggle Button */}
+        <div className="flex items-center gap-2">
+          <button
+            className={`transition-all duration-200 rounded-md px-2 py-1 text-[11px] leading-none flex items-center gap-1 cursor-pointer ${
+              mode === 'code' 
+                ? 'bg-blue-500/20 hover:bg-blue-500/30 text-blue-200 border border-blue-500/30' 
+                : 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-200 border border-purple-500/30'
+            }`}
+            onClick={onModeToggle}
+            type="button"
+            title={`Active Mode: ${mode === 'code' ? 'Code (Returns only direct code solutions)' : 'General (Conversational answers)'}. Click to switch.`}
+          >
+            {mode === 'code' ? '💻 Code' : '🌟 General'}
           </button>
         </div>
 
