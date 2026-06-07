@@ -2,19 +2,39 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --bg-color: 0, 0, 0;
+  --bg-opacity: 0.25;
+  --text-color-primary: #f9fafb;
+  --text-color-secondary: #d1d5db;
+  --text-color-muted: #9ca3af;
+  --border-color: rgba(255, 255, 255, 0.15);
+}
+
+.text-primary {
+  color: var(--text-color-primary) !important;
+}
+.text-secondary {
+  color: var(--text-color-secondary) !important;
+}
+.text-muted {
+  color: var(--text-color-muted) !important;
+}
+
 /* Liquid Glass Effect Base */
 .liquid-glass {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(var(--bg-color), var(--bg-opacity));
   backdrop-filter: blur(16px) saturate(180%) brightness(120%);
   -webkit-backdrop-filter: blur(16px) saturate(180%) brightness(120%);
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid var(--border-color);
   border-radius: 1rem;
   box-shadow: 
     0 8px 32px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 1px 0 var(--border-color),
     inset 0 -1px 0 rgba(0, 0, 0, 0.1);
   position: relative;
   overflow: hidden;
+  color: var(--text-color-primary);
 }
 
 /* Enhanced liquid glass with shimmer effect */
@@ -120,26 +140,26 @@ button, input, select, textarea, .interactive {
 .liquid-glass.chat-container {
   min-height: auto;
   height: auto;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(var(--bg-color), var(--bg-opacity));
   backdrop-filter: blur(20px) saturate(200%) brightness(110%);
   -webkit-backdrop-filter: blur(20px) saturate(200%) brightness(110%);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  border: 1px solid var(--border-color);
   box-shadow: 
     0 12px 40px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 1px 0 var(--border-color),
     inset 0 -1px 0 rgba(0, 0, 0, 0.05);
 }
 
 /* Thin bar variant of liquid glass - for command bar */
 .liquid-glass-bar {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(var(--bg-color), var(--bg-opacity));
   backdrop-filter: blur(16px) saturate(180%) brightness(120%);
   -webkit-backdrop-filter: blur(16px) saturate(180%) brightness(120%);
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid var(--border-color);
   border-radius: 1rem;
   box-shadow: 
     0 8px 32px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 1px 0 var(--border-color),
     inset 0 -1px 0 rgba(0, 0, 0, 0.1);
   position: relative;
   overflow: hidden;
