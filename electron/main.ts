@@ -4,6 +4,7 @@ import { WindowHelper } from "./WindowHelper"
 import { ScreenshotHelper } from "./ScreenshotHelper"
 import { ShortcutsHelper } from "./shortcuts"
 import { ProcessingHelper } from "./ProcessingHelper"
+import { ConfigHelper } from "./ConfigHelper"
 
 export class AppState {
   private static instance: AppState | null = null
@@ -12,6 +13,7 @@ export class AppState {
   private screenshotHelper: ScreenshotHelper
   public shortcutsHelper: ShortcutsHelper
   public processingHelper: ProcessingHelper
+  public configHelper: ConfigHelper
   private tray: Tray | null = null
 
   // View management
@@ -46,6 +48,9 @@ export class AppState {
   } as const
 
   constructor() {
+    // Initialize ConfigHelper
+    this.configHelper = new ConfigHelper()
+
     // Initialize WindowHelper with this
     this.windowHelper = new WindowHelper(this)
 

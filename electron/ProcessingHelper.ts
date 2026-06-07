@@ -19,16 +19,18 @@ export class ProcessingHelper {
   constructor(appState: AppState) {
     this.appState = appState
     
-    const apiKey = process.env.GEMINI_API_KEY
-    const geminiModel = process.env.GEMINI_MODEL || (apiKey && apiKey.startsWith('omnikey-') ? 'auto' : 'gemini-2.5-flash')
+    const config = this.appState.configHelper.loadConfig()
+    const apiKey = config.apiKey
+    const geminiModel = config.model
     
     if (apiKey) {
-      console.log(`[ProcessingHelper] Initializing with Gemini/OmniKey model: ${geminiModel}`)
+      console.log(`[ProcessingHelper] Initializing with Gemini/OmniKey model: ${geminiModel} from config`)
     } else {
-      console.log(`[ProcessingHelper] Initializing without API Key (awaiting user entry in UI)`)
+      console.log(`[ProcessingHelper] Initializing without API Key (awaiting user entry in onboarding/UI)`)
     }
     
     this.llmHelper = new LLMHelper(apiKey || undefined, geminiModel)
+    this.llmHelper.setMode(config.mode)
   }
 
   public async processScreenshots(): Promise<void> {

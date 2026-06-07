@@ -1,10 +1,12 @@
 import { GoogleGenerativeAI, GenerativeModel } from "@google/generative-ai"
 import fs from "fs"
+import { ConfigHelper } from "./ConfigHelper"
 
 export class LLMHelper {
   private model: GenerativeModel | null = null
   private mode: 'code' | 'general' = 'code'
   private chatHistory: Array<{ role: 'user' | 'model', parts: any[] }> = []
+  private configHelper = new ConfigHelper()
 
   public clearChatHistory(): void {
     this.chatHistory = [];
@@ -26,6 +28,7 @@ export class LLMHelper {
   public setMode(mode: 'code' | 'general'): void {
     this.mode = mode;
     console.log(`[LLMHelper] Mode set to: ${mode}`);
+    this.configHelper.updateConfig({ mode });
   }
 
   private keyType: 'gemini' | 'omnikey-openai' | 'omnikey-gemini' = 'gemini'
@@ -448,8 +451,8 @@ export class LLMHelper {
     return this.chatWithGemini(message);
   }
 
-  public getCurrentProvider(): "gemini" {
-    return "gemini";
+  public getCurrentProvider(): "gemini" | "omnikey" {
+    return this.keyType === 'gemini' ? 'gemini' : 'omnikey';
   }
 
   public getCurrentModel(): string {
@@ -483,6 +486,16 @@ export class LLMHelper {
     }
     if (this.keyType !== 'gemini' && !this.apiKey) {
       throw new Error("No OmniKey API key configured");
+    }
+
+    // Persist to local config.json
+    if (this.apiKey) {
+      this.configHelper.updateConfig({
+        apiKey: this.apiKey,
+        model: this.geminiModel,
+        provider: this.keyType === 'gemini' ? 'gemini' : 'omnikey',
+        onboardingCompleted: true
+      });
     }
 
     console.log(`[LLMHelper] Switched to Gemini/OmniKey (Type: ${this.keyType}, Model: ${this.geminiModel})`);
