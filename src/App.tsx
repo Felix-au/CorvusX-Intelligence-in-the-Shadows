@@ -4,6 +4,7 @@ import { ToastViewport } from "@radix-ui/react-toast"
 import { useEffect, useRef, useState } from "react"
 import Solutions from "./_pages/Solutions"
 import { QueryClient, QueryClientProvider } from "react-query"
+import { OnboardingWizard } from "./components/ui/OnboardingWizard"
 
 declare global {
   interface Window {
@@ -49,7 +50,7 @@ declare global {
       moveWindowDown: () => Promise<void>
       quitApp: () => Promise<void>
       
-      getCurrentLlmConfig: () => Promise<{ provider: "gemini"; model: string; isOllama: boolean }>
+      getCurrentLlmConfig: () => Promise<{ provider: "gemini" | "omnikey"; model: string; isOllama: boolean }>
       switchToGemini: (apiKey?: string, model?: string) => Promise<{ success: boolean; error?: string }>
       testLlmConnection: (apiKey?: string, model?: string) => Promise<{ success: boolean; error?: string }>
       getLlmMode: () => Promise<'code' | 'general'>
@@ -71,7 +72,21 @@ const queryClient = new QueryClient({
 
 const App: React.FC = () => {
   const [view, setView] = useState<"queue" | "solutions" | "debug">("queue")
+  const [isOnboardingActive, setIsOnboardingActive] = useState<boolean>(true)
   const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const checkOnboarding = async () => {
+      try {
+        const completed = await window.electronAPI.invoke("get-onboarding-status")
+        setIsOnboardingActive(!completed)
+      } catch (err) {
+        console.error("Failed to check onboarding status:", err)
+        setIsOnboardingActive(true)
+      }
+    }
+    checkOnboarding()
+  }, [])
 
   // Effect for height monitoring
   useEffect(() => {
@@ -125,7 +140,7 @@ const App: React.FC = () => {
       resizeObserver.disconnect()
       mutationObserver.disconnect()
     }
-  }, [view]) // Re-run when view changes
+  }, [view, isOnboardingActive]) // Re-run when view or onboarding state changes
 
   useEffect(() => {
     const cleanupFunctions = [
@@ -166,7 +181,9 @@ const App: React.FC = () => {
     <div ref={containerRef} className="min-h-0">
       <QueryClientProvider client={queryClient}>
         <ToastProvider>
-          {view === "queue" ? (
+          {isOnboardingActive ? (
+            <OnboardingWizard onComplete={() => setIsOnboardingActive(false)} />
+          ) : view === "queue" ? (
             <Queue setView={setView} />
           ) : view === "solutions" ? (
             <Solutions setView={setView} />
