@@ -38,6 +38,7 @@ const Queue: React.FC<QueueProps> = ({ setView }) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [currentModel, setCurrentModel] = useState<{ provider: string; model: string }>({ provider: "gemini", model: "auto" })
   const [audioResult, setAudioResult] = useState<string | null>(null)
+  const [mode, setMode] = useState<'code' | 'general'>('code')
 
   const barRef = useRef<HTMLDivElement>(null)
 
@@ -110,17 +111,20 @@ const Queue: React.FC<QueueProps> = ({ setView }) => {
     }
   }
 
-  // Load current model configuration on mount
+  // Load current model configuration and mode on mount
   useEffect(() => {
-    const loadCurrentModel = async () => {
+    const loadCurrentModelAndMode = async () => {
       try {
         const config = await window.electronAPI.getCurrentLlmConfig();
         setCurrentModel({ provider: config.provider, model: config.model });
+        
+        const activeMode = await window.electronAPI.getLlmMode();
+        setMode(activeMode);
       } catch (error) {
-        console.error('Error loading current model config:', error);
+        console.error('Error loading current config/mode:', error);
       }
     };
-    loadCurrentModel();
+    loadCurrentModelAndMode();
   }, []);
 
   useEffect(() => {
@@ -207,6 +211,21 @@ const Queue: React.FC<QueueProps> = ({ setView }) => {
     }])
   }
 
+  const handleModeToggle = async () => {
+    const newMode = mode === 'code' ? 'general' : 'code';
+    try {
+      setMode(newMode);
+      await window.electronAPI.setLlmMode(newMode);
+      showToast(
+        "Mode Switched",
+        `Wingman is now in ${newMode === 'code' ? '💻 Code Mode' : '🌟 General Mode'}.`,
+        "neutral"
+      );
+    } catch (err) {
+      console.error("Failed to switch mode:", err);
+    }
+  }
+
   const handleClearAll = () => {
     setChatMessages([])
     setAudioResult(null)
@@ -289,12 +308,19 @@ const Queue: React.FC<QueueProps> = ({ setView }) => {
               setAudioResult={setAudioResult}
               onClearAll={handleClearAll}
               chatMessagesCount={chatMessages.length}
+              mode={mode}
+              onModeToggle={handleModeToggle}
             />
           </div>
           {/* Conditional Settings Interface */}
           {isSettingsOpen && (
             <div className="mt-4 w-full mx-auto">
-              <ModelSelector onModelChange={handleModelChange} onChatOpen={() => setIsChatOpen(true)} />
+              <ModelSelector 
+                onModelChange={handleModelChange} 
+                onChatOpen={() => setIsChatOpen(true)}
+                mode={mode}
+                onModeSwitch={setMode}
+              />
             </div>
           )}
 

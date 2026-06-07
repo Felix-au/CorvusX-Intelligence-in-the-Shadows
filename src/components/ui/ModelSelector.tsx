@@ -8,9 +8,11 @@ interface ModelConfig {
 interface ModelSelectorProps {
   onModelChange?: (provider: "gemini", model: string) => void;
   onChatOpen?: () => void;
+  mode?: 'code' | 'general';
+  onModeSwitch?: (mode: 'code' | 'general') => void;
 }
 
-const ModelSelector: React.FC<ModelSelectorProps> = ({ onModelChange, onChatOpen }) => {
+const ModelSelector: React.FC<ModelSelectorProps> = ({ onModelChange, onChatOpen, mode: propMode, onModeSwitch }) => {
   const [currentConfig, setCurrentConfig] = useState<ModelConfig | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [connectionStatus, setConnectionStatus] = useState<'testing' | 'success' | 'error' | null>(null);
@@ -19,7 +21,14 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ onModelChange, onChatOpen
   const [selectedGeminiModel, setSelectedGeminiModel] = useState<string>("gemini-2.5-flash");
   const [customGeminiModel, setCustomGeminiModel] = useState<string>("");
   const [showCustomModelInput, setShowCustomModelInput] = useState<boolean>(false);
-  const [mode, setMode] = useState<'code' | 'general'>('code');
+  const [mode, setMode] = useState<'code' | 'general'>(propMode || 'code');
+
+  // Sync mode from props
+  useEffect(() => {
+    if (propMode) {
+      setMode(propMode);
+    }
+  }, [propMode]);
 
   useEffect(() => {
     loadCurrentConfig();
@@ -64,6 +73,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ onModelChange, onChatOpen
     try {
       setMode(newMode);
       await window.electronAPI.setLlmMode(newMode);
+      onModeSwitch?.(newMode);
     } catch (error) {
       console.error('Error switching mode:', error);
     }
