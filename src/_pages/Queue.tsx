@@ -14,10 +14,9 @@ import { renderMarkdown } from "../lib/utils"
 
 interface QueueProps {
   setView: React.Dispatch<React.SetStateAction<"queue" | "solutions" | "debug">>
-  theme?: "light" | "dark"
 }
 
-const Queue: React.FC<QueueProps> = ({ setView, theme = "dark" }) => {
+const Queue: React.FC<QueueProps> = ({ setView }) => {
   const [toastOpen, setToastOpen] = useState(false)
   const [toastMessage, setToastMessage] = useState<ToastMessage>({
     title: "",
@@ -25,8 +24,6 @@ const Queue: React.FC<QueueProps> = ({ setView, theme = "dark" }) => {
     variant: "neutral"
   })
 
-  const [isTooltipVisible, setIsTooltipVisible] = useState(false)
-  const [tooltipHeight, setTooltipHeight] = useState(0)
   const contentRef = useRef<HTMLDivElement>(null)
 
   const [chatInput, setChatInput] = useState("")
@@ -64,12 +61,11 @@ const Queue: React.FC<QueueProps> = ({ setView, theme = "dark" }) => {
   )
 
   const showToast = (
-    title: string,
-    description: string,
-    variant: ToastVariant
+    _title: string,
+    _description: string,
+    _variant: ToastVariant
   ) => {
-    setToastMessage({ title, description, variant })
-    setToastOpen(true)
+    // No-op to suppress all toast notifications as requested by the user
   }
 
   const handleDeleteScreenshot = async (index: number) => {
@@ -92,10 +88,11 @@ const Queue: React.FC<QueueProps> = ({ setView, theme = "dark" }) => {
   }
 
   const handleChatSend = async () => {
-    if (!chatInput.trim() && attachedScreenshots.length === 0) return
     const userText = chatInput.trim()
-    const userImages = attachedScreenshots.map(s => s.preview)
-    const userImagePaths = attachedScreenshots.map(s => s.path)
+    const userImages = attachedScreenshots.map((scr) => scr.preview)
+    const userImagePaths = attachedScreenshots.map((scr) => scr.path)
+
+    if (!userText && userImages.length === 0) return
 
     setChatMessages((msgs) => [...msgs, { role: "user", text: userText || "Sent screenshots", images: userImages }])
     setChatLoading(true)
@@ -131,11 +128,8 @@ const Queue: React.FC<QueueProps> = ({ setView, theme = "dark" }) => {
   useEffect(() => {
     const updateDimensions = () => {
       if (contentRef.current) {
-        let contentHeight = contentRef.current.scrollHeight
+        const contentHeight = contentRef.current.scrollHeight
         const contentWidth = contentRef.current.scrollWidth
-        if (isTooltipVisible) {
-          contentHeight += tooltipHeight
-        }
         window.electronAPI.updateContentDimensions({
           width: contentWidth,
           height: contentHeight
@@ -174,26 +168,18 @@ const Queue: React.FC<QueueProps> = ({ setView, theme = "dark" }) => {
       resizeObserver.disconnect()
       cleanupFunctions.forEach((cleanup) => cleanup())
     }
-  }, [isTooltipVisible, tooltipHeight])
+  }, [])
 
   // Seamless screenshot attachment flow
   useEffect(() => {
-    // Listen for screenshot taken event
     const unsubscribe = window.electronAPI.onScreenshotTaken(async (data) => {
-      // Add screenshot to the attached list
       setAttachedScreenshots((prev) => [...prev, data]);
-      // Open the chat window so the user sees it is attached
       setIsChatOpen(true);
     });
     return () => {
       unsubscribe && unsubscribe();
     };
   }, []);
-
-  const handleTooltipVisibilityChange = (visible: boolean, height: number) => {
-    setIsTooltipVisible(visible)
-    setTooltipHeight(height)
-  }
 
   const handleChatToggle = () => {
     setIsChatOpen((prev) => !prev)
@@ -205,7 +191,6 @@ const Queue: React.FC<QueueProps> = ({ setView, theme = "dark" }) => {
 
   const handleModelChange = (provider: "gemini", model: string) => {
     setCurrentModel({ provider, model })
-    // Update chat messages to reflect the model change
     setChatMessages((msgs) => [...msgs, {
       role: "gemini",
       text: `🔄 Switched to ☁️ ${model}. Ready for your questions!`
@@ -277,7 +262,6 @@ const Queue: React.FC<QueueProps> = ({ setView, theme = "dark" }) => {
     }
   }, [audioResult, chatMessages])
 
-
   return (
     <div
       ref={barRef}
@@ -286,10 +270,10 @@ const Queue: React.FC<QueueProps> = ({ setView, theme = "dark" }) => {
         width: "100%",
         pointerEvents: "auto"
       }}
-      className="select-none"
+      className="select-none flex flex-col items-center justify-center w-full"
     >
-      <div className="bg-transparent w-full">
-        <div className="px-2 py-1">
+      <div className="bg-transparent w-full flex flex-col items-center" ref={contentRef}>
+        <div className="px-2 py-1 flex flex-col items-center w-full">
           <Toast
             open={toastOpen}
             onOpenChange={setToastOpen}
@@ -299,10 +283,10 @@ const Queue: React.FC<QueueProps> = ({ setView, theme = "dark" }) => {
             <ToastTitle>{toastMessage.title}</ToastTitle>
             <ToastDescription>{toastMessage.description}</ToastDescription>
           </Toast>
-          <div className="w-fit">
+          
+          <div className="w-fit flex justify-center">
             <QueueCommands
               screenshots={screenshots}
-              onTooltipVisibilityChange={handleTooltipVisibilityChange}
               onChatToggle={handleChatToggle}
               onSettingsToggle={handleSettingsToggle}
               audioResult={audioResult}
@@ -311,12 +295,32 @@ const Queue: React.FC<QueueProps> = ({ setView, theme = "dark" }) => {
               chatMessagesCount={chatMessages.length}
               mode={mode}
               onModeToggle={handleModeToggle}
-              theme={theme}
             />
           </div>
+
+          {/* Conditional Audio Result Interface (Styled like Chat Section) */}
+          {audioResult && (
+            <div className="mt-4 w-full max-w-[360px] liquid-glass chat-container p-3 flex flex-col text-left">
+              <div className="flex items-center justify-between mb-2 pb-1 border-b border-black/10 dark:border-white/10">
+                <span className="text-[11px] font-bold text-primary flex items-center gap-1">
+                  🎤 Voice Input Result
+                </span>
+                <button
+                  onClick={() => setAudioResult(null)}
+                  className="text-[10px] text-secondary hover:text-primary transition-colors cursor-pointer"
+                >
+                  ✕ Close
+                </button>
+              </div>
+              <div className="p-2.5 rounded-lg bg-black/5 dark:bg-white/10 backdrop-blur-md glass-content border border-black/10 dark:border-white/20 shadow-lg text-[11px] text-primary max-h-32 overflow-y-auto leading-relaxed">
+                {renderMarkdown(audioResult)}
+              </div>
+            </div>
+          )}
+
           {/* Conditional Settings Interface */}
           {isSettingsOpen && (
-            <div className="mt-4 w-full mx-auto">
+            <div className="mt-4 w-full max-w-[360px]">
               <ModelSelector 
                 onModelChange={handleModelChange} 
                 onChatOpen={() => setIsChatOpen(true)}
@@ -328,7 +332,7 @@ const Queue: React.FC<QueueProps> = ({ setView, theme = "dark" }) => {
 
           {/* Conditional Chat Interface */}
           {isChatOpen && (
-            <div className="mt-4 w-full mx-auto liquid-glass chat-container p-4 flex flex-col">
+            <div className="mt-4 w-full max-w-[360px] liquid-glass chat-container p-4 flex flex-col text-left">
               <div className="flex-1 overflow-y-auto mb-3 p-3 rounded-lg bg-black/5 dark:bg-white/10 backdrop-blur-md max-h-64 min-h-[120px] glass-content border border-black/10 dark:border-white/20 shadow-lg">
                 {chatMessages.length === 0 ? (
                   <div className="text-sm text-secondary text-center mt-8">

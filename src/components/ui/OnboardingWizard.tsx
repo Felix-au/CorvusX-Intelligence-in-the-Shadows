@@ -181,36 +181,11 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete, 
                   <label className="text-[10px] font-bold text-muted uppercase tracking-wider block">
                     Background Theme
                   </label>
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setTheme("dark")}
-                      className={`p-2.5 rounded-xl border text-left flex flex-col justify-between transition-all duration-200 cursor-pointer ${
-                        theme === "dark"
-                          ? "bg-white/85 border-blue-500/50 shadow-md ring-1 ring-blue-500/20 text-gray-800"
-                          : "bg-white/10 border-white/25 text-primary hover:bg-white/20"
-                      }`}
-                    >
-                      <span className="text-xs font-bold">🌙 Dark Backdrop</span>
-                      <span className="text-[9px] mt-1 leading-normal opacity-70">
-                        Translucent blackish background for dark desktops.
-                      </span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setTheme("light")}
-                      className={`p-2.5 rounded-xl border text-left flex flex-col justify-between transition-all duration-200 cursor-pointer ${
-                        theme === "light"
-                          ? "bg-white/85 border-blue-500/50 shadow-md ring-1 ring-blue-500/20 text-gray-800"
-                          : "bg-white/10 border-white/25 text-primary hover:bg-white/20"
-                      }`}
-                    >
-                      <span className="text-xs font-bold">☀️ Light Backdrop</span>
-                      <span className="text-[9px] mt-1 leading-normal opacity-70">
-                        Translucent whitish background for light desktops.
-                      </span>
-                    </button>
+                  <div className="p-3 rounded-xl border border-blue-500/50 bg-white/15 text-primary flex flex-col justify-between shadow-md ring-1 ring-blue-500/10">
+                    <span className="text-xs font-bold">🌙 Dark Backdrop (Default)</span>
+                    <span className="text-[9px] mt-1 leading-normal opacity-75">
+                      Translucent blackish background optimized for stealth HUD integration.
+                    </span>
                   </div>
                 </div>
 

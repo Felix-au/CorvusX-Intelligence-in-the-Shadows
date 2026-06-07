@@ -1,10 +1,7 @@
-import React, { useState, useEffect, useRef } from "react"
+import React, { useState, useRef } from "react"
 import { IoLogOutOutline } from "react-icons/io5"
-import { Dialog, DialogContent, DialogClose } from "../ui/dialog"
-import { renderMarkdown } from "../../lib/utils"
 
 interface QueueCommandsProps {
-  onTooltipVisibilityChange: (visible: boolean, height: number) => void
   screenshots: Array<{ path: string; preview: string }>
   onChatToggle: () => void
   onSettingsToggle: () => void
@@ -14,11 +11,9 @@ interface QueueCommandsProps {
   chatMessagesCount: number
   mode: 'code' | 'general'
   onModeToggle: () => void
-  theme: 'light' | 'dark'
 }
 
 const QueueCommands: React.FC<QueueCommandsProps> = ({
-  onTooltipVisibilityChange,
   screenshots: _screenshots,
   onChatToggle,
   onSettingsToggle,
@@ -27,31 +22,11 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
   onClearAll,
   chatMessagesCount,
   mode,
-  onModeToggle,
-  theme
+  onModeToggle
 }) => {
-  const [isTooltipVisible, setIsTooltipVisible] = useState(false)
-  const tooltipRef = useRef<HTMLDivElement>(null)
   const [isRecording, setIsRecording] = useState(false)
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null)
   const chunks = useRef<Blob[]>([])
-  // Remove all chat-related state, handlers, and the Dialog overlay from this file.
-
-  useEffect(() => {
-    let tooltipHeight = 0
-    if (tooltipRef.current && isTooltipVisible) {
-      tooltipHeight = tooltipRef.current.offsetHeight + 10
-    }
-    onTooltipVisibilityChange(isTooltipVisible, tooltipHeight)
-  }, [isTooltipVisible])
-
-  const handleMouseEnter = () => {
-    setIsTooltipVisible(true)
-  }
-
-  const handleMouseLeave = () => {
-    setIsTooltipVisible(false)
-  }
 
   const handleRecordClick = async () => {
     if (!isRecording) {
@@ -89,8 +64,6 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
     }
   }
 
-  // Remove handleChatSend function
-
   return (
     <div className="w-fit">
       <div className="text-xs text-primary liquid-glass-bar py-1 px-4 flex items-center justify-center gap-4 draggable-area">
@@ -110,12 +83,12 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
         {/* Voice Recording Button */}
         <div className="flex items-center gap-2">
           <button
-            className={`bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 border border-black/10 dark:border-white/10 transition-colors rounded-md px-2 py-1 text-[11px] leading-none text-primary flex items-center gap-1 ${isRecording ? 'bg-red-500/70 dark:bg-red-500/70 hover:bg-red-500/90 dark:hover:bg-red-500/90 text-white' : ''}`}
+            className={`bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 border border-black/10 dark:border-white/10 transition-colors rounded-md px-2 py-1 text-[11px] leading-none text-primary flex items-center gap-1 cursor-pointer ${isRecording ? 'bg-red-500/70 dark:bg-red-500/70 hover:bg-red-500/90 dark:hover:bg-red-500/90 text-white animate-pulse' : ''}`}
             onClick={handleRecordClick}
             type="button"
           >
             {isRecording ? (
-              <span className="animate-pulse text-white">● Stop Recording</span>
+              <span className="text-white">● Stop Recording</span>
             ) : (
               <span>🎤 Record Voice</span>
             )}
@@ -125,7 +98,7 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
         {/* Chat Button */}
         <div className="flex items-center gap-2">
           <button
-            className="bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 border border-black/10 dark:border-white/10 transition-colors rounded-md px-2 py-1 text-[11px] leading-none text-primary flex items-center gap-1"
+            className="bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 border border-black/10 dark:border-white/10 transition-colors rounded-md px-2 py-1 text-[11px] leading-none text-primary flex items-center gap-1 cursor-pointer"
             onClick={onChatToggle}
             type="button"
           >
@@ -136,15 +109,7 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
         {/* Mode Toggle Button */}
         <div className="flex items-center gap-2">
           <button
-            className={`transition-all duration-200 rounded-md px-2 py-1 text-[11px] leading-none flex items-center gap-1 cursor-pointer ${
-              theme === 'light'
-                ? mode === 'code'
-                  ? 'bg-blue-600/10 hover:bg-blue-600/20 text-blue-900 border border-blue-600/30 font-semibold'
-                  : 'bg-purple-600/10 hover:bg-purple-600/20 text-purple-900 border border-purple-600/30 font-semibold'
-                : mode === 'code' 
-                  ? 'bg-blue-500/20 hover:bg-blue-500/30 text-blue-200 border border-blue-500/30' 
-                  : 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-200 border border-purple-500/30'
-            }`}
+            className="transition-all duration-200 rounded-md px-2 py-1 text-[11px] leading-none flex items-center gap-1 cursor-pointer bg-blue-500/20 hover:bg-blue-500/30 text-blue-200 border border-blue-500/30"
             onClick={onModeToggle}
             type="button"
             title={`Active Mode: ${mode === 'code' ? 'Code (Returns only direct code solutions)' : 'General (Conversational answers)'}. Click to switch.`}
@@ -156,7 +121,7 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
         {/* Settings Button */}
         <div className="flex items-center gap-2">
           <button
-            className="bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 border border-black/10 dark:border-white/10 transition-colors rounded-md px-2 py-1 text-[11px] leading-none text-primary flex items-center gap-1"
+            className="bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 border border-black/10 dark:border-white/10 transition-colors rounded-md px-2 py-1 text-[11px] leading-none text-primary flex items-center gap-1 cursor-pointer"
             onClick={onSettingsToggle}
             type="button"
             title="Toggle Settings and AI Models (Ctrl+I)"
@@ -169,7 +134,7 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
         {(audioResult || chatMessagesCount > 0) && (
           <div className="flex items-center gap-2">
             <button
-              className="bg-black/5 dark:bg-white/10 hover:bg-red-500/20 dark:hover:bg-red-500/20 border border-black/10 dark:border-white/10 hover:border-red-500/30 dark:hover:border-red-500/30 transition-all rounded-md px-2 py-1 text-[11px] leading-none text-primary flex items-center gap-1"
+              className="bg-black/5 dark:bg-white/10 hover:bg-red-500/20 dark:hover:bg-red-500/20 border border-black/10 dark:border-white/10 hover:border-red-500/30 dark:hover:border-red-500/30 transition-all rounded-md px-2 py-1 text-[11px] leading-none text-primary flex items-center gap-1 cursor-pointer"
               onClick={onClearAll}
               type="button"
               title="Clear audio results and chat messages (Ctrl+U)"
@@ -178,140 +143,6 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
             </button>
           </div>
         )}
-
-        {/* Question mark with tooltip */}
-        <div
-          className="relative inline-block"
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-        >
-          <div className="w-6 h-6 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 border border-black/10 dark:border-white/10 backdrop-blur-sm transition-colors flex items-center justify-center cursor-help z-10">
-            <span className="text-xs text-primary font-bold">?</span>
-          </div>
-
-          {/* Tooltip Content */}
-          {isTooltipVisible && (
-            <div
-              ref={tooltipRef}
-              className="absolute top-full right-0 mt-2 w-80"
-            >
-              <div className="p-3 text-xs bg-black/80 backdrop-blur-md rounded-lg border border-white/10 text-white/90 shadow-lg">
-                <div className="space-y-4">
-                  <h3 className="font-medium truncate">Keyboard Shortcuts</h3>
-                  <div className="space-y-3">
-                    {/* Clear UI Command */}
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span className="truncate">Clear UI Results</span>
-                        <div className="flex gap-1 flex-shrink-0">
-                          <span className="bg-white/10 px-1.5 py-0.5 rounded text-[10px] leading-none">
-                            Ctrl
-                          </span>
-                          <span className="bg-white/10 px-1.5 py-0.5 rounded text-[10px] leading-none">
-                            U
-                          </span>
-                        </div>
-                      </div>
-                      <p className="text-[10px] leading-relaxed text-white/70">
-                        Clear chat messages and audio results from UI (keeps context).
-                      </p>
-                    </div>
-
-                    {/* New Chat Command */}
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span className="truncate">New Chat Session</span>
-                        <div className="flex gap-1 flex-shrink-0">
-                          <span className="bg-white/10 px-1.5 py-0.5 rounded text-[10px] leading-none">
-                            Ctrl
-                          </span>
-                          <span className="bg-white/10 px-1.5 py-0.5 rounded text-[10px] leading-none">
-                            O
-                          </span>
-                        </div>
-                      </div>
-                      <p className="text-[10px] leading-relaxed text-white/70">
-                        Clear UI and reset backend conversation context.
-                      </p>
-                    </div>
-
-                    {/* Toggle Settings Command */}
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span className="truncate">Toggle Settings</span>
-                        <div className="flex gap-1 flex-shrink-0">
-                          <span className="bg-white/10 px-1.5 py-0.5 rounded text-[10px] leading-none">
-                            Ctrl
-                          </span>
-                          <span className="bg-white/10 px-1.5 py-0.5 rounded text-[10px] leading-none">
-                            I
-                          </span>
-                        </div>
-                      </div>
-                      <p className="text-[10px] leading-relaxed text-white/70">
-                        Toggle settings dashboard / AI models list.
-                      </p>
-                    </div>
-
-                    {/* Copy Response Command */}
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span className="truncate">Copy AI Response</span>
-                        <div className="flex gap-1 flex-shrink-0">
-                          <span className="bg-white/10 px-1.5 py-0.5 rounded text-[10px] leading-none">
-                            Ctrl
-                          </span>
-                          <span className="bg-white/10 px-1.5 py-0.5 rounded text-[10px] leading-none">
-                            C
-                          </span>
-                        </div>
-                      </div>
-                      <p className="text-[10px] leading-relaxed text-white/70">
-                        Copy the latest AI response to clipboard when no text is highlighted.
-                      </p>
-                    </div>
-
-                    {/* Toggle Command */}
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span className="truncate">Toggle Window</span>
-                        <div className="flex gap-1 flex-shrink-0">
-                          <span className="bg-white/10 px-1.5 py-0.5 rounded text-[10px] leading-none">
-                            ⌘
-                          </span>
-                          <span className="bg-white/10 px-1.5 py-0.5 rounded text-[10px] leading-none">
-                            B
-                          </span>
-                        </div>
-                      </div>
-                      <p className="text-[10px] leading-relaxed text-white/70">
-                        Show or hide this window.
-                      </p>
-                    </div>
-
-                    {/* Screenshot Command */}
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span className="truncate">Attach Screenshot</span>
-                        <div className="flex gap-1 flex-shrink-0">
-                          <span className="bg-white/10 px-1.5 py-0.5 rounded text-[10px] leading-none">
-                            ⌘
-                          </span>
-                          <span className="bg-white/10 px-1.5 py-0.5 rounded text-[10px] leading-none">
-                            H
-                          </span>
-                        </div>
-                      </div>
-                      <p className="text-[10px] leading-relaxed text-white/70">
-                        Take a screenshot and attach it to the active chat.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
 
         {/* Separator */}
         <div className="mx-2 h-4 w-px bg-black/10 dark:bg-white/20" />
@@ -325,13 +156,6 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
           <IoLogOutOutline className="w-4 h-4" />
         </button>
       </div>
-      {/* Audio Result Display */}
-      {audioResult && (
-        <div className="mt-2 p-2 bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/10 rounded text-primary text-xs max-w-md">
-          <span className="font-semibold block mb-1">Audio Result:</span>
-          <div>{renderMarkdown(audioResult)}</div>
-        </div>
-      )}
     </div>
   )
 }

@@ -216,7 +216,7 @@ const App: React.FC = () => {
               }}
             />
           ) : view === "queue" ? (
-            <Queue setView={setView} theme={theme} />
+            <Queue setView={setView} />
           ) : view === "solutions" ? (
             <Solutions setView={setView} />
           ) : (

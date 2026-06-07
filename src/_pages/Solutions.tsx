@@ -179,12 +179,11 @@ const Solutions: React.FC<SolutionsProps> = ({ setView }) => {
   )
 
   const showToast = (
-    title: string,
-    description: string,
-    variant: ToastVariant
+    _title: string,
+    _description: string,
+    _variant: ToastVariant
   ) => {
-    setToastMessage({ title, description, variant })
-    setToastOpen(true)
+    // No-op to suppress all toast notifications as requested by the user
   }
 
   const handleDeleteExtraScreenshot = async (index: number) => {
