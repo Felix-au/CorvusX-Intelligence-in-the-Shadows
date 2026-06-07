@@ -216,6 +216,15 @@ export function initializeIpcHandlers(appState: AppState): void {
     }
   });
 
+  ipcMain.handle("get-app-config", async () => {
+    try {
+      return appState.configHelper.loadConfig();
+    } catch (error: any) {
+      console.error("Error getting app config:", error);
+      throw error;
+    }
+  });
+
   ipcMain.handle("complete-onboarding", async (_, apiKey: string, provider: 'gemini' | 'omnikey', model: string, mode: 'code' | 'general', theme?: 'light' | 'dark', opacity?: number) => {
     try {
       const llmHelper = appState.processingHelper.getLLMHelper();
