@@ -4,13 +4,11 @@ import { IoLogOutOutline } from "react-icons/io5"
 interface SolutionCommandsProps {
   extraScreenshots: any[]
   onTooltipVisibilityChange?: (visible: boolean, height: number) => void
-  theme?: "light" | "dark"
 }
 
 const SolutionCommands: React.FC<SolutionCommandsProps> = ({
   extraScreenshots,
-  onTooltipVisibilityChange,
-  theme = "dark"
+  onTooltipVisibilityChange
 }) => {
   const [isTooltipVisible, setIsTooltipVisible] = useState(false)
   const tooltipRef = useRef<HTMLDivElement>(null)

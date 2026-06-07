@@ -10,10 +10,9 @@ interface ModelSelectorProps {
   onChatOpen?: () => void;
   mode?: 'code' | 'general';
   onModeSwitch?: (mode: 'code' | 'general') => void;
-  theme?: "light" | "dark";
 }
 
-const ModelSelector: React.FC<ModelSelectorProps> = ({ onModelChange, onChatOpen, mode: propMode, onModeSwitch, theme = "dark" }) => {
+const ModelSelector: React.FC<ModelSelectorProps> = ({ onModelChange, onChatOpen, mode: propMode, onModeSwitch }) => {
   const [currentConfig, setCurrentConfig] = useState<ModelConfig | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [connectionStatus, setConnectionStatus] = useState<'testing' | 'success' | 'error' | null>(null);

@@ -199,11 +199,9 @@ const CodeComparisonSection = ({
 interface DebugProps {
   isProcessing: boolean
   setIsProcessing: (isProcessing: boolean) => void
-  theme?: "light" | "dark"
-  opacity?: number
 }
 
-const Debug: React.FC<DebugProps> = ({ isProcessing, setIsProcessing, theme = "dark", opacity = 0.25 }) => {
+const Debug: React.FC<DebugProps> = ({ isProcessing, setIsProcessing }) => {
   const queryClient = useQueryClient()
   const contentRef = useRef<HTMLDivElement>(null)
 
@@ -371,7 +369,6 @@ const Debug: React.FC<DebugProps> = ({ isProcessing, setIsProcessing, theme = "d
       <ExtraScreenshotsQueueHelper
         extraScreenshots={extraScreenshots}
         onTooltipVisibilityChange={handleTooltipVisibilityChange}
-        theme={theme}
       />
 
       {/* Main Content */}

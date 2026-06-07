@@ -15,10 +15,9 @@ import { renderMarkdown } from "../lib/utils"
 interface QueueProps {
   setView: React.Dispatch<React.SetStateAction<"queue" | "solutions" | "debug">>
   theme?: "light" | "dark"
-  opacity?: number
 }
 
-const Queue: React.FC<QueueProps> = ({ setView, theme = "dark", opacity = 0.25 }) => {
+const Queue: React.FC<QueueProps> = ({ setView, theme = "dark" }) => {
   const [toastOpen, setToastOpen] = useState(false)
   const [toastMessage, setToastMessage] = useState<ToastMessage>({
     title: "",
@@ -323,7 +322,6 @@ const Queue: React.FC<QueueProps> = ({ setView, theme = "dark", opacity = 0.25 }
                 onChatOpen={() => setIsChatOpen(true)}
                 mode={mode}
                 onModeSwitch={setMode}
-                theme={theme}
               />
             </div>
           )}

@@ -127,10 +127,8 @@ export const ComplexitySection = ({
 
 interface SolutionsProps {
   setView: React.Dispatch<React.SetStateAction<"queue" | "solutions" | "debug">>
-  theme?: "light" | "dark"
-  opacity?: number
 }
-const Solutions: React.FC<SolutionsProps> = ({ setView, theme = "dark", opacity = 0.25 }) => {
+const Solutions: React.FC<SolutionsProps> = ({ setView }) => {
   const queryClient = useQueryClient()
   const contentRef = useRef<HTMLDivElement>(null)
 
@@ -453,8 +451,6 @@ const Solutions: React.FC<SolutionsProps> = ({ setView, theme = "dark", opacity 
           <Debug
             isProcessing={debugProcessing}
             setIsProcessing={setDebugProcessing}
-            theme={theme}
-            opacity={opacity}
           />
         </>
       ) : (
@@ -488,7 +484,6 @@ const Solutions: React.FC<SolutionsProps> = ({ setView, theme = "dark", opacity 
           <SolutionCommands
             extraScreenshots={extraScreenshots}
             onTooltipVisibilityChange={handleTooltipVisibilityChange}
-            theme={theme}
           />
 
           {/* Main Content - Modified width constraints */}
