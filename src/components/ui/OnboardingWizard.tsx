@@ -16,12 +16,13 @@ import {
 
 interface OnboardingWizardProps {
   onComplete: () => void
+  onStyleChange?: (theme: "light" | "dark", opacity: number) => void
 }
 
 type ProviderType = "gemini" | "omnikey"
 type ModeType = "code" | "general"
 
-export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }) => {
+export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete, onStyleChange }) => {
   const [step, setStep] = useState<number>(1)
   const [theme, setTheme] = useState<"light" | "dark">("dark")
   const [opacity, setOpacity] = useState<number>(0.25)
@@ -45,7 +46,11 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
     root.style.setProperty("--text-color-secondary", theme === "light" ? "#4b5563" : "#d1d5db")
     root.style.setProperty("--text-color-muted", theme === "light" ? "#6b7280" : "#9ca3af")
     root.style.setProperty("--border-color", theme === "light" ? "rgba(0, 0, 0, 0.15)" : "rgba(255, 255, 255, 0.15)")
-  }, [theme, opacity])
+    
+    if (onStyleChange) {
+      onStyleChange(theme, opacity)
+    }
+  }, [theme, opacity, onStyleChange])
 
   const handleTestConnection = async () => {
     if (!apiKey.trim()) {

@@ -73,6 +73,8 @@ const queryClient = new QueryClient({
 const App: React.FC = () => {
   const [view, setView] = useState<"queue" | "solutions" | "debug">("queue")
   const [isOnboardingActive, setIsOnboardingActive] = useState<boolean>(true)
+  const [theme, setTheme] = useState<"light" | "dark">("dark")
+  const [opacity, setOpacity] = useState<number>(0.25)
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -80,13 +82,20 @@ const App: React.FC = () => {
       try {
         const completed = await window.electronAPI.invoke("get-onboarding-status")
         setIsOnboardingActive(!completed)
+        if (completed) {
+          const config = await window.electronAPI.invoke("get-app-config")
+          if (config) {
+            setTheme(config.theme || "dark")
+            setOpacity(config.opacity !== undefined ? config.opacity : 0.25)
+          }
+        }
       } catch (err) {
         console.error("Failed to check onboarding status:", err)
         setIsOnboardingActive(true)
       }
     }
     checkOnboarding()
-  }, [])
+  }, [isOnboardingActive])
 
   // Effect for height monitoring
   useEffect(() => {
@@ -177,12 +186,27 @@ const App: React.FC = () => {
     return () => cleanupFunctions.forEach((cleanup) => cleanup())
   }, [])
 
+  const containerStyle = {
+    '--bg-color': theme === 'light' ? '255, 255, 255' : '0, 0, 0',
+    '--bg-opacity': String(opacity),
+    '--text-color-primary': theme === 'light' ? '#1f2937' : '#f9fafb',
+    '--text-color-secondary': theme === 'light' ? '#4b5563' : '#d1d5db',
+    '--text-color-muted': theme === 'light' ? '#6b7280' : '#9ca3af',
+    '--border-color': theme === 'light' ? 'rgba(0, 0, 0, 0.15)' : 'rgba(255, 255, 255, 0.15)',
+  } as React.CSSProperties
+
   return (
-    <div ref={containerRef} className="min-h-0">
+    <div ref={containerRef} className="min-h-0" style={containerStyle}>
       <QueryClientProvider client={queryClient}>
         <ToastProvider>
           {isOnboardingActive ? (
-            <OnboardingWizard onComplete={() => setIsOnboardingActive(false)} />
+            <OnboardingWizard 
+              onComplete={() => setIsOnboardingActive(false)} 
+              onStyleChange={(t, o) => {
+                setTheme(t)
+                setOpacity(o)
+              }}
+            />
           ) : view === "queue" ? (
             <Queue setView={setView} />
           ) : view === "solutions" ? (
