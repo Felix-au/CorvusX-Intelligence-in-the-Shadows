@@ -188,11 +188,11 @@ const App: React.FC = () => {
 
   const containerStyle = {
     '--bg-color': theme === 'light' ? '255, 255, 255' : '0, 0, 0',
-    '--bg-opacity': String(opacity),
-    '--text-color-primary': theme === 'light' ? '#1f2937' : '#f9fafb',
-    '--text-color-secondary': theme === 'light' ? '#4b5563' : '#d1d5db',
-    '--text-color-muted': theme === 'light' ? '#6b7280' : '#9ca3af',
-    '--border-color': theme === 'light' ? 'rgba(0, 0, 0, 0.15)' : 'rgba(255, 255, 255, 0.15)',
+    '--bg-opacity': theme === 'light' ? String(opacity * 0.08) : String(opacity),
+    '--text-color-primary': theme === 'light' ? '#000000' : '#f9fafb',
+    '--text-color-secondary': theme === 'light' ? '#111111' : '#d1d5db',
+    '--text-color-muted': theme === 'light' ? '#374151' : '#9ca3af',
+    '--border-color': theme === 'light' ? 'rgba(0, 0, 0, 0.12)' : 'rgba(255, 255, 255, 0.15)',
   } as React.CSSProperties
 
   return (

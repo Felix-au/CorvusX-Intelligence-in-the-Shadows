@@ -41,11 +41,11 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete, 
   useEffect(() => {
     const root = document.documentElement
     root.style.setProperty("--bg-color", theme === "light" ? "255, 255, 255" : "0, 0, 0")
-    root.style.setProperty("--bg-opacity", String(opacity))
-    root.style.setProperty("--text-color-primary", theme === "light" ? "#1f2937" : "#f9fafb")
-    root.style.setProperty("--text-color-secondary", theme === "light" ? "#4b5563" : "#d1d5db")
-    root.style.setProperty("--text-color-muted", theme === "light" ? "#6b7280" : "#9ca3af")
-    root.style.setProperty("--border-color", theme === "light" ? "rgba(0, 0, 0, 0.15)" : "rgba(255, 255, 255, 0.15)")
+    root.style.setProperty("--bg-opacity", theme === "light" ? String(opacity * 0.08) : String(opacity))
+    root.style.setProperty("--text-color-primary", theme === "light" ? "#000000" : "#f9fafb")
+    root.style.setProperty("--text-color-secondary", theme === "light" ? "#111111" : "#d1d5db")
+    root.style.setProperty("--text-color-muted", theme === "light" ? "#374151" : "#9ca3af")
+    root.style.setProperty("--border-color", theme === "light" ? "rgba(0, 0, 0, 0.12)" : "rgba(255, 255, 255, 0.15)")
     
     if (onStyleChange) {
       onStyleChange(theme, opacity)
