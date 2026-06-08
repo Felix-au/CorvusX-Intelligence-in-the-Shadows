@@ -495,11 +495,12 @@ export class LLMHelper {
 
     // Persist to local config.json
     if (this.apiKey) {
+      const currentConfig = this.configHelper.loadConfig();
       this.configHelper.updateConfig({
         apiKey: this.apiKey,
         model: this.geminiModel,
         provider: this.keyType === 'gemini' ? 'gemini' : 'omnikey',
-        onboardingCompleted: true
+        onboardingCompleted: currentConfig.onboardingCompleted
       });
     }
 
