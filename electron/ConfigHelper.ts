@@ -11,6 +11,7 @@ export interface AppConfig {
   theme: "light" | "dark"
   opacity: number
   pulseEnabled: boolean
+  codingLanguage: string
 }
 
 const DEFAULT_CONFIG: AppConfig = {
@@ -21,7 +22,8 @@ const DEFAULT_CONFIG: AppConfig = {
   mode: "code",
   theme: "dark",
   opacity: 0.25,
-  pulseEnabled: true
+  pulseEnabled: true,
+  codingLanguage: "Auto-Detect"
 }
 
 export class ConfigHelper {
@@ -48,7 +50,8 @@ export class ConfigHelper {
         mode: "code",
         theme: "dark",
         opacity: 0.25,
-        pulseEnabled: true
+        pulseEnabled: true,
+        codingLanguage: "Auto-Detect"
       }
     }
 
@@ -70,7 +73,8 @@ export class ConfigHelper {
         mode: parsed.mode ?? DEFAULT_CONFIG.mode,
         theme: parsed.theme ?? DEFAULT_CONFIG.theme,
         opacity: parsed.opacity ?? DEFAULT_CONFIG.opacity,
-        pulseEnabled: parsed.pulseEnabled ?? DEFAULT_CONFIG.pulseEnabled
+        pulseEnabled: parsed.pulseEnabled ?? DEFAULT_CONFIG.pulseEnabled,
+        codingLanguage: parsed.codingLanguage ?? DEFAULT_CONFIG.codingLanguage
       }
     } catch (error) {
       console.error("[ConfigHelper] Error reading config file:", error)
