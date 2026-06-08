@@ -14,9 +14,11 @@ import { renderMarkdown } from "../lib/utils"
 
 interface QueueProps {
   setView: React.Dispatch<React.SetStateAction<"queue" | "solutions" | "debug">>
+  opacity?: number
+  onOpacityChange?: (opacity: number) => void
 }
 
-const Queue: React.FC<QueueProps> = ({ setView }) => {
+const Queue: React.FC<QueueProps> = ({ setView, opacity = 0.25, onOpacityChange }) => {
   const [toastOpen, setToastOpen] = useState(false)
   const [toastMessage, setToastMessage] = useState<ToastMessage>({
     title: "",
@@ -36,6 +38,7 @@ const Queue: React.FC<QueueProps> = ({ setView }) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [currentModel, setCurrentModel] = useState<{ provider: string; model: string }>({ provider: "gemini", model: "auto" })
   const [audioResult, setAudioResult] = useState<string | null>(null)
+  const [isAudioLoading, setIsAudioLoading] = useState(false)
   const [mode, setMode] = useState<'code' | 'general'>('code')
 
   const barRef = useRef<HTMLDivElement>(null)
@@ -295,44 +298,61 @@ const Queue: React.FC<QueueProps> = ({ setView }) => {
               chatMessagesCount={chatMessages.length}
               mode={mode}
               onModeToggle={handleModeToggle}
+              isAudioLoading={isAudioLoading}
+              setIsAudioLoading={setIsAudioLoading}
             />
           </div>
 
-          {/* Conditional Audio Result Interface (Styled like Chat Section) */}
-          {audioResult && (
-            <div className="mt-4 w-full max-w-[360px] liquid-glass chat-container p-3 flex flex-col text-left">
+          {/* Conditional Audio Loading/Result Interface (Styled like Chat Section, broader space) */}
+          {(isAudioLoading || audioResult) && (
+            <div className="mt-4 w-full max-w-[600px] liquid-glass chat-container p-3 flex flex-col text-left">
               <div className="flex items-center justify-between mb-2 pb-1 border-b border-black/10 dark:border-white/10">
                 <span className="text-[11px] font-bold text-primary flex items-center gap-1">
-                  🎤 Voice Input Result
+                  🎤 Voice Input Status
                 </span>
-                <button
-                  onClick={() => setAudioResult(null)}
-                  className="text-[10px] text-secondary hover:text-primary transition-colors cursor-pointer"
-                >
-                  ✕ Close
-                </button>
+                {(audioResult && !isAudioLoading) && (
+                  <button
+                    onClick={() => setAudioResult(null)}
+                    className="text-[10px] text-secondary hover:text-primary transition-colors cursor-pointer"
+                  >
+                    ✕ Close
+                  </button>
+                )}
               </div>
-              <div className="p-2.5 rounded-lg bg-black/5 dark:bg-white/10 backdrop-blur-md glass-content border border-black/10 dark:border-white/20 shadow-lg text-[11px] text-primary max-h-32 overflow-y-auto leading-relaxed">
-                {renderMarkdown(audioResult)}
-              </div>
+              {isAudioLoading ? (
+                <div className="p-3 rounded-lg bg-black/5 dark:bg-white/10 backdrop-blur-md glass-content border border-black/10 dark:border-white/20 shadow-lg text-[11px] text-primary flex items-center gap-2">
+                  <span className="flex gap-1 shrink-0">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce [animation-delay:0.2s]" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce [animation-delay:0.4s]" />
+                  </span>
+                  <span className="text-secondary animate-pulse">Processing voice recording & transcribing request...</span>
+                </div>
+              ) : (
+                <div className="p-2.5 rounded-lg bg-black/5 dark:bg-white/10 backdrop-blur-md glass-content border border-black/10 dark:border-white/20 shadow-lg text-[11px] text-primary max-h-32 overflow-y-auto leading-relaxed">
+                  {renderMarkdown(audioResult || "")}
+                </div>
+              )}
             </div>
           )}
 
-          {/* Conditional Settings Interface */}
+          {/* Conditional Settings Interface (broader space) */}
           {isSettingsOpen && (
-            <div className="mt-4 w-full max-w-[360px]">
+            <div className="mt-4 w-full max-w-[600px]">
               <ModelSelector 
                 onModelChange={handleModelChange} 
                 onChatOpen={() => setIsChatOpen(true)}
                 mode={mode}
                 onModeSwitch={setMode}
+                opacity={opacity}
+                onOpacityChange={onOpacityChange}
               />
             </div>
           )}
 
-          {/* Conditional Chat Interface */}
+          {/* Conditional Chat Interface (broader space) */}
           {isChatOpen && (
-            <div className="mt-4 w-full max-w-[360px] liquid-glass chat-container p-4 flex flex-col text-left">
+            <div className="mt-4 w-full max-w-[600px] liquid-glass chat-container p-4 flex flex-col text-left">
               <div className="flex-1 overflow-y-auto mb-3 p-3 rounded-lg bg-black/5 dark:bg-white/10 backdrop-blur-md max-h-64 min-h-[120px] glass-content border border-black/10 dark:border-white/20 shadow-lg">
                 {chatMessages.length === 0 ? (
                   <div className="text-sm text-secondary text-center mt-8">
