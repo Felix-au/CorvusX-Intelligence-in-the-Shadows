@@ -30,6 +30,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete, 
   const [apiKey, setApiKey] = useState<string>("")
   const [showApiKey, setShowApiKey] = useState<boolean>(false)
   const [mode, setMode] = useState<ModeType>("code")
+  const [codingLanguage, setCodingLanguage] = useState<string>("Auto-Detect")
 
   // Connection testing state
   const [isTesting, setIsTesting] = useState<boolean>(false)
@@ -122,7 +123,10 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete, 
         defaultModel,
         mode,
         theme,
-        opacity
+        opacity,
+        true, // onboardingCompleted
+        true, // pulseEnabled
+        codingLanguage
       )
       if (response.success) {
         onComplete()
@@ -440,6 +444,30 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete, 
                   </p>
                 </div>
               </div>
+
+              {/* Language Dropdown for Code Mode */}
+              {mode === "code" && (
+                <div className="space-y-1.5 pt-2 animate-fadeIn">
+                  <label className="text-[10px] font-bold text-muted uppercase tracking-wider block">
+                    Default Coding Language
+                  </label>
+                  <select
+                    value={codingLanguage}
+                    onChange={(e) => setCodingLanguage(e.target.value)}
+                    className="w-full px-3 py-2 bg-white/20 text-primary border border-white/25 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/40 interactive"
+                  >
+                    <option className="bg-gray-850 text-white" value="Auto-Detect">Auto-Detect</option>
+                    <option className="bg-gray-850 text-white" value="Python">Python</option>
+                    <option className="bg-gray-850 text-white" value="JavaScript">JavaScript</option>
+                    <option className="bg-gray-850 text-white" value="TypeScript">TypeScript</option>
+                    <option className="bg-gray-850 text-white" value="Java">Java</option>
+                    <option className="bg-gray-850 text-white" value="C">C</option>
+                    <option className="bg-gray-850 text-white" value="C++">C++</option>
+                    <option className="bg-gray-850 text-white" value="Go">Go</option>
+                    <option className="bg-gray-850 text-white" value="Rust">Rust</option>
+                  </select>
+                </div>
+              )}
             </div>
           )}
 
