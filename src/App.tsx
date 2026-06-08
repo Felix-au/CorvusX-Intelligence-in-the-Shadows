@@ -87,6 +87,11 @@ const App: React.FC = () => {
           if (config) {
             setTheme(config.theme || "dark")
             setOpacity(config.opacity !== undefined ? config.opacity : 0.25)
+            if (config.pulseEnabled === false) {
+              document.documentElement.classList.add("disable-pulse")
+            } else {
+              document.documentElement.classList.remove("disable-pulse")
+            }
           }
         }
       } catch (err) {
