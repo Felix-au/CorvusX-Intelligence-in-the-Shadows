@@ -225,7 +225,7 @@ export function initializeIpcHandlers(appState: AppState): void {
     }
   });
 
-  ipcMain.handle("complete-onboarding", async (_, apiKey: string, provider: 'gemini' | 'omnikey', model: string, mode: 'code' | 'general', theme?: 'light' | 'dark', opacity?: number, onboardingCompleted?: boolean) => {
+  ipcMain.handle("complete-onboarding", async (_, apiKey: string, provider: 'gemini' | 'omnikey', model: string, mode: 'code' | 'general', theme?: 'light' | 'dark', opacity?: number, onboardingCompleted?: boolean, pulseEnabled?: boolean) => {
     try {
       const llmHelper = appState.processingHelper.getLLMHelper();
       
@@ -237,7 +237,8 @@ export function initializeIpcHandlers(appState: AppState): void {
         model,
         mode,
         theme: theme || 'dark',
-        opacity: opacity !== undefined ? opacity : 0.25
+        opacity: opacity !== undefined ? opacity : 0.25,
+        pulseEnabled: pulseEnabled !== undefined ? pulseEnabled : true
       });
 
       // Switch in memory

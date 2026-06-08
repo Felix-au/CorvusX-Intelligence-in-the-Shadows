@@ -10,6 +10,7 @@ export interface AppConfig {
   mode: "code" | "general"
   theme: "light" | "dark"
   opacity: number
+  pulseEnabled: boolean
 }
 
 const DEFAULT_CONFIG: AppConfig = {
@@ -19,7 +20,8 @@ const DEFAULT_CONFIG: AppConfig = {
   model: "gemini-2.5-flash",
   mode: "code",
   theme: "dark",
-  opacity: 0.25
+  opacity: 0.25,
+  pulseEnabled: true
 }
 
 export class ConfigHelper {
@@ -45,7 +47,8 @@ export class ConfigHelper {
         model: envModel || (envGeminiKey ? "gemini-2.5-flash" : "auto"),
         mode: "code",
         theme: "dark",
-        opacity: 0.25
+        opacity: 0.25,
+        pulseEnabled: true
       }
     }
 
@@ -66,7 +69,8 @@ export class ConfigHelper {
         model: parsed.model ?? DEFAULT_CONFIG.model,
         mode: parsed.mode ?? DEFAULT_CONFIG.mode,
         theme: parsed.theme ?? DEFAULT_CONFIG.theme,
-        opacity: parsed.opacity ?? DEFAULT_CONFIG.opacity
+        opacity: parsed.opacity ?? DEFAULT_CONFIG.opacity,
+        pulseEnabled: parsed.pulseEnabled ?? DEFAULT_CONFIG.pulseEnabled
       }
     } catch (error) {
       console.error("[ConfigHelper] Error reading config file:", error)
