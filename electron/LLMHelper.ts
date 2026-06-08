@@ -15,7 +15,12 @@ export class LLMHelper {
 
   private getSystemPrompt(): string {
     if (this.mode === 'code') {
-      return `You are Wingman AI, a technical copilot and software engineering assistant. For any user input, analyze it from a technical perspective. If the user input or problem involves a coding question, programming concept, or technical query, respond directly with clean, production-ready code to solve it. Keep it precise, direct, and extremely concise. No introductory or closing remarks, no suggestions or options, just the direct solution/code.`;
+      const config = this.configHelper.loadConfig();
+      const language = config.codingLanguage || 'Auto-Detect';
+      const languageInstruction = language !== 'Auto-Detect'
+        ? ` IMPORTANT: Write the code solution exclusively in the ${language} programming language.`
+        : "";
+      return `You are Wingman AI, a technical copilot and software engineering assistant. For any user input, analyze it from a technical perspective. If the user input or problem involves a coding question, programming concept, or technical query, respond directly with clean, production-ready code to solve it. Keep it precise, direct, and extremely concise. No introductory or closing remarks, no suggestions or options, just the direct solution/code.${languageInstruction}`;
     } else {
       return `You are Wingman AI, a helpful, direct, and proactive assistant. For any user input, provide a clear, direct, and highly concise answer. Avoid long-winded paragraphs, unnecessary background, or listings of options/next steps unless specifically requested. Answer directly in a single brief paragraph.`;
     }
