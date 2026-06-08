@@ -11,6 +11,8 @@ interface QueueCommandsProps {
   chatMessagesCount: number
   mode: 'code' | 'general'
   onModeToggle: () => void
+  isAudioLoading?: boolean;
+  setIsAudioLoading?: (loading: boolean) => void;
 }
 
 const QueueCommands: React.FC<QueueCommandsProps> = ({
@@ -22,7 +24,9 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
   onClearAll,
   chatMessagesCount,
   mode,
-  onModeToggle
+  onModeToggle,
+  isAudioLoading: _isAudioLoading,
+  setIsAudioLoading
 }) => {
   const [isRecording, setIsRecording] = useState(false)
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null)
@@ -42,10 +46,13 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
           reader.onloadend = async () => {
             const base64Data = (reader.result as string).split(',')[1]
             try {
+              setIsAudioLoading?.(true)
               const result = await window.electronAPI.analyzeAudioFromBase64(base64Data, blob.type)
               setAudioResult(result.text)
             } catch (err) {
               setAudioResult('Audio analysis failed.')
+            } finally {
+              setIsAudioLoading?.(false)
             }
           }
           reader.readAsDataURL(blob)
@@ -88,7 +95,10 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
             type="button"
           >
             {isRecording ? (
-              <span className="text-white">● Stop Recording</span>
+              <span className="flex items-center gap-1 text-white">
+                <span className="w-2 h-2 rounded-full bg-red-500 animate-ping shrink-0" />
+                <span>Stop Recording</span>
+              </span>
             ) : (
               <span>🎤 Record Voice</span>
             )}
