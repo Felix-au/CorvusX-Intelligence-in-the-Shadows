@@ -34,6 +34,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
   const [currentOpacity, setCurrentOpacity] = useState<number>(propOpacity !== undefined ? propOpacity : 0.25);
   const [showTutorialOnStartup, setShowTutorialOnStartup] = useState(false);
   const [pulseEnabled, setPulseEnabled] = useState(true);
+  const [codingLanguage, setCodingLanguage] = useState<string>("Auto-Detect");
 
   // Sync mode from props
   useEffect(() => {
@@ -64,6 +65,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
         setCurrentOpacity(config.opacity !== undefined ? config.opacity : 0.25);
         setShowTutorialOnStartup(!config.onboardingCompleted);
         setPulseEnabled(config.pulseEnabled !== false);
+        setCodingLanguage(config.codingLanguage || "Auto-Detect");
         
         const modelName = config.model || "gemini-2.5-flash";
         const standardModels = [
@@ -150,7 +152,8 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
           currentTheme,
           currentOpacity,
           !showTutorialOnStartup, // onboardingCompleted
-          pulseEnabled
+          pulseEnabled,
+          codingLanguage
         );
 
         if (pulseEnabled) {
@@ -244,6 +247,31 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
             <span className="text-[8px] mt-0.5 opacity-70">Conversational replies</span>
           </button>
         </div>
+
+        {/* Conditional Language Selection */}
+        {mode === 'code' && (
+          <div className="space-y-1 pt-1.5 animate-fadeIn">
+            <label className="text-[10px] font-bold text-muted uppercase tracking-wider block">Coding Language</label>
+            <select
+              value={codingLanguage}
+              onChange={(e) => {
+                setCodingLanguage(e.target.value);
+                setConnectionStatus(null);
+              }}
+              className="w-full px-3 py-1.5 bg-black/5 dark:bg-white/5 text-primary border border-black/10 dark:border-white/20 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-blue-500/40 interactive"
+            >
+              <option className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white" value="Auto-Detect">Auto-Detect</option>
+              <option className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white" value="Python">Python</option>
+              <option className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white" value="JavaScript">JavaScript</option>
+              <option className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white" value="TypeScript">TypeScript</option>
+              <option className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white" value="Java">Java</option>
+              <option className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white" value="C">C</option>
+              <option className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white" value="C++">C++</option>
+              <option className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white" value="Go">Go</option>
+              <option className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white" value="Rust">Rust</option>
+            </select>
+          </div>
+        )}
       </div>
 
       {/* Provider selection (Gemini vs OmniKey) */}
@@ -381,50 +409,53 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
         />
       </div>
 
-      {/* Tutorial on Startup */}
-      <div className="space-y-1.5 bg-black/5 dark:bg-white/5 p-2 rounded-lg border border-black/10 dark:border-white/20 flex items-center justify-between">
-        <div>
-          <label className="text-[10px] font-bold text-primary block uppercase tracking-wider">Show Tutorial on Startup</label>
-          <span className="text-[8px] text-muted leading-normal block">Launches setup onboarding on next startup.</span>
-        </div>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={showTutorialOnStartup}
-          onClick={() => setShowTutorialOnStartup(prev => !prev)}
-          className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none interactive ${
-            showTutorialOnStartup ? 'bg-blue-600' : 'bg-black/25 dark:bg-white/10'
-          }`}
-        >
-          <span
-            className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-              showTutorialOnStartup ? 'translate-x-4' : 'translate-x-0'
+      {/* Settings Toggles (Startup & Animations) */}
+      <div className="grid grid-cols-2 gap-2">
+        {/* Tutorial on Startup */}
+        <div className="space-y-1.5 bg-black/5 dark:bg-white/5 p-2 rounded-lg border border-black/10 dark:border-white/20 flex items-center justify-between">
+          <div>
+            <label className="text-[10px] font-bold text-primary block uppercase tracking-wider">Show On Startup</label>
+            <span className="text-[8px] text-muted leading-normal block">Launches onboarding.</span>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={showTutorialOnStartup}
+            onClick={() => setShowTutorialOnStartup(prev => !prev)}
+            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none interactive ${
+              showTutorialOnStartup ? 'bg-blue-600' : 'bg-black/25 dark:bg-white/10'
             }`}
-          />
-        </button>
-      </div>
+          >
+            <span
+              className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                showTutorialOnStartup ? 'translate-x-4' : 'translate-x-0'
+              }`}
+            />
+          </button>
+        </div>
 
-      {/* Pulsing Effects */}
-      <div className="space-y-1.5 bg-black/5 dark:bg-white/5 p-2 rounded-lg border border-black/10 dark:border-white/20 flex items-center justify-between">
-        <div>
-          <label className="text-[10px] font-bold text-primary block uppercase tracking-wider">Enable Pulsing Effects</label>
-          <span className="text-[8px] text-muted leading-normal block">Toggles shimmer animations and loading pulses.</span>
-        </div>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={pulseEnabled}
-          onClick={() => setPulseEnabled(prev => !prev)}
-          className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none interactive ${
-            pulseEnabled ? 'bg-blue-600' : 'bg-black/25 dark:bg-white/10'
-          }`}
-        >
-          <span
-            className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-              pulseEnabled ? 'translate-x-4' : 'translate-x-0'
+        {/* Pulsing Effects */}
+        <div className="space-y-1.5 bg-black/5 dark:bg-white/5 p-2 rounded-lg border border-black/10 dark:border-white/20 flex items-center justify-between">
+          <div>
+            <label className="text-[10px] font-bold text-primary block uppercase tracking-wider">Pulsing Effects</label>
+            <span className="text-[8px] text-muted leading-normal block">Toggles animations.</span>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={pulseEnabled}
+            onClick={() => setPulseEnabled(prev => !prev)}
+            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none interactive ${
+              pulseEnabled ? 'bg-blue-600' : 'bg-black/25 dark:bg-white/10'
             }`}
-          />
-        </button>
+          >
+            <span
+              className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                pulseEnabled ? 'translate-x-4' : 'translate-x-0'
+              }`}
+            />
+          </button>
+        </div>
       </div>
 
       {/* Action buttons */}
