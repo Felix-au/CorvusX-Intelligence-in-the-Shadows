@@ -128,6 +128,7 @@ export class WindowHelper {
       if (this.mainWindow) {
         // Center the window first
         this.centerWindow()
+        this.mainWindow.setContentProtection(true)
         this.mainWindow.show()
         this.mainWindow.focus()
         this.mainWindow.setAlwaysOnTop(true)
@@ -208,6 +209,7 @@ export class WindowHelper {
       })
     }
 
+    this.mainWindow.setContentProtection(true)
     this.mainWindow.showInactive()
 
     this.isWindowVisible = true
@@ -260,6 +262,7 @@ export class WindowHelper {
     }
 
     this.centerWindow()
+    this.mainWindow.setContentProtection(true)
     this.mainWindow.show()
     this.mainWindow.focus()
     this.mainWindow.setAlwaysOnTop(true)
