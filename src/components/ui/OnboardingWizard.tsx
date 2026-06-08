@@ -454,17 +454,17 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete, 
                   <select
                     value={codingLanguage}
                     onChange={(e) => setCodingLanguage(e.target.value)}
-                    className="w-full px-3 py-2 bg-white/20 text-primary border border-white/25 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/40 interactive"
+                    className="w-full px-3 py-2 bg-black/20 dark:bg-white/10 text-primary border border-white/20 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/40 interactive"
                   >
-                    <option className="bg-gray-850 text-white" value="Auto-Detect">Auto-Detect</option>
-                    <option className="bg-gray-850 text-white" value="Python">Python</option>
-                    <option className="bg-gray-850 text-white" value="JavaScript">JavaScript</option>
-                    <option className="bg-gray-850 text-white" value="TypeScript">TypeScript</option>
-                    <option className="bg-gray-850 text-white" value="Java">Java</option>
-                    <option className="bg-gray-850 text-white" value="C">C</option>
-                    <option className="bg-gray-850 text-white" value="C++">C++</option>
-                    <option className="bg-gray-850 text-white" value="Go">Go</option>
-                    <option className="bg-gray-850 text-white" value="Rust">Rust</option>
+                    <option className="bg-gray-800 text-white" value="Auto-Detect">Auto-Detect</option>
+                    <option className="bg-gray-800 text-white" value="Python">Python</option>
+                    <option className="bg-gray-800 text-white" value="JavaScript">JavaScript</option>
+                    <option className="bg-gray-800 text-white" value="TypeScript">TypeScript</option>
+                    <option className="bg-gray-800 text-white" value="Java">Java</option>
+                    <option className="bg-gray-800 text-white" value="C">C</option>
+                    <option className="bg-gray-800 text-white" value="C++">C++</option>
+                    <option className="bg-gray-800 text-white" value="Go">Go</option>
+                    <option className="bg-gray-800 text-white" value="Rust">Rust</option>
                   </select>
                 </div>
               )}
