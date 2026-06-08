@@ -1,14 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { Eye, EyeOff, Check, AlertTriangle } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 
 interface ModelSelectorProps {
   onModelChange?: (provider: "gemini", model: string) => void;
   onChatOpen?: () => void;
   mode?: 'code' | 'general';
   onModeSwitch?: (mode: 'code' | 'general') => void;
+  opacity?: number;
+  onOpacityChange?: (opacity: number) => void;
 }
 
-const ModelSelector: React.FC<ModelSelectorProps> = ({ onModelChange, onChatOpen, mode: propMode, onModeSwitch }) => {
+const ModelSelector: React.FC<ModelSelectorProps> = ({ 
+  onModelChange, 
+  onChatOpen, 
+  mode: propMode, 
+  onModeSwitch,
+  opacity: propOpacity,
+  onOpacityChange
+}) => {
   const [isLoading, setIsLoading] = useState(true);
   const [provider, setProvider] = useState<'gemini' | 'omnikey'>('gemini');
   const [geminiApiKey, setGeminiApiKey] = useState('');
@@ -22,7 +31,8 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ onModelChange, onChatOpen
   const [errorMessage, setErrorMessage] = useState<string>('');
   
   const [currentTheme, setCurrentTheme] = useState<"light" | "dark">("dark");
-  const [currentOpacity, setCurrentOpacity] = useState<number>(0.25);
+  const [currentOpacity, setCurrentOpacity] = useState<number>(propOpacity !== undefined ? propOpacity : 0.25);
+  const [showTutorialOnStartup, setShowTutorialOnStartup] = useState(false);
 
   // Sync mode from props
   useEffect(() => {
@@ -30,6 +40,13 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ onModelChange, onChatOpen
       setMode(propMode);
     }
   }, [propMode]);
+
+  // Sync opacity from props
+  useEffect(() => {
+    if (propOpacity !== undefined) {
+      setCurrentOpacity(propOpacity);
+    }
+  }, [propOpacity]);
 
   useEffect(() => {
     loadCurrentConfig();
@@ -44,6 +61,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ onModelChange, onChatOpen
         setGeminiApiKey(config.apiKey || "");
         setCurrentTheme(config.theme || "dark");
         setCurrentOpacity(config.opacity !== undefined ? config.opacity : 0.25);
+        setShowTutorialOnStartup(!config.onboardingCompleted);
         
         const modelName = config.model || "gemini-2.5-flash";
         const standardModels = [
@@ -128,7 +146,8 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ onModelChange, onChatOpen
           modelToUse,
           mode,
           currentTheme,
-          currentOpacity
+          currentOpacity,
+          !showTutorialOnStartup // onboardingCompleted
         );
 
         await loadCurrentConfig();
@@ -316,7 +335,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ onModelChange, onChatOpen
             setShowCustomModelInput(val === 'custom');
             setConnectionStatus(null);
           }}
-          className="w-full px-3 py-1.5 bg-black/5 dark:bg-white/5 text-primary border border-black/10 dark:border-white/20 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-blue-500/40 animate-none"
+          className="w-full px-3 py-1.5 bg-black/5 dark:bg-white/5 text-primary border border-black/10 dark:border-white/20 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-blue-500/40"
         >
           <option className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white" value="auto">auto (Recommended for OmniKey)</option>
           <option className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white" value="gemini-3.5-flash">gemini-3.5-flash</option>
@@ -343,6 +362,41 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ onModelChange, onChatOpen
           />
         </div>
       )}
+
+      {/* Opacity slider */}
+      <div className="space-y-1.5 bg-black/5 dark:bg-white/5 p-2 rounded-lg border border-black/10 dark:border-white/20">
+        <div className="flex justify-between items-center text-[10px] font-bold text-muted uppercase tracking-wider">
+          <span>Backdrop Opacity</span>
+          <span className="font-mono text-primary text-xs">{Math.round(currentOpacity * 100)}%</span>
+        </div>
+        <input
+          type="range"
+          min="0.05"
+          max="1.00"
+          step="0.05"
+          value={currentOpacity}
+          onChange={(e) => {
+            const val = parseFloat(e.target.value);
+            setCurrentOpacity(val);
+            onOpacityChange?.(val);
+          }}
+          className="w-full h-1 bg-black/25 rounded-lg appearance-none cursor-pointer accent-blue-500 border border-white/10"
+        />
+      </div>
+
+      {/* Tutorial on Startup */}
+      <div className="space-y-1.5 bg-black/5 dark:bg-white/5 p-2 rounded-lg border border-black/10 dark:border-white/20 flex items-center justify-between">
+        <div>
+          <label className="text-[10px] font-bold text-primary block uppercase tracking-wider">Show Tutorial on Startup</label>
+          <span className="text-[8px] text-muted leading-normal block">Launches setup onboarding on next startup.</span>
+        </div>
+        <input
+          type="checkbox"
+          checked={showTutorialOnStartup}
+          onChange={(e) => setShowTutorialOnStartup(e.target.checked)}
+          className="w-3.5 h-3.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer interactive"
+        />
+      </div>
 
       {/* Action buttons */}
       <div className="flex gap-2 pt-2 border-t border-black/10 dark:border-white/10">

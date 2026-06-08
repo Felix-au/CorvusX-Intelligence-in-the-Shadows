@@ -225,13 +225,13 @@ export function initializeIpcHandlers(appState: AppState): void {
     }
   });
 
-  ipcMain.handle("complete-onboarding", async (_, apiKey: string, provider: 'gemini' | 'omnikey', model: string, mode: 'code' | 'general', theme?: 'light' | 'dark', opacity?: number) => {
+  ipcMain.handle("complete-onboarding", async (_, apiKey: string, provider: 'gemini' | 'omnikey', model: string, mode: 'code' | 'general', theme?: 'light' | 'dark', opacity?: number, onboardingCompleted?: boolean) => {
     try {
       const llmHelper = appState.processingHelper.getLLMHelper();
       
       // Update config file
       appState.configHelper.updateConfig({
-        onboardingCompleted: true,
+        onboardingCompleted: onboardingCompleted !== undefined ? onboardingCompleted : true,
         apiKey,
         provider,
         model,
