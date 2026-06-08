@@ -201,3 +201,12 @@ button, input, select, textarea, .interactive {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.3);
 }
+
+/* Custom animation disabling when pulsing effects are turned off */
+.disable-pulse .liquid-glass::before,
+.disable-pulse .liquid-glass-bar::before,
+.disable-pulse .animate-pulse {
+  animation: none !important;
+  transition: none !important;
+}
+
