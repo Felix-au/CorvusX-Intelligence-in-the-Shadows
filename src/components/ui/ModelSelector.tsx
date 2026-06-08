@@ -33,6 +33,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
   const [currentTheme, setCurrentTheme] = useState<"light" | "dark">("dark");
   const [currentOpacity, setCurrentOpacity] = useState<number>(propOpacity !== undefined ? propOpacity : 0.25);
   const [showTutorialOnStartup, setShowTutorialOnStartup] = useState(false);
+  const [pulseEnabled, setPulseEnabled] = useState(true);
 
   // Sync mode from props
   useEffect(() => {
@@ -62,6 +63,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
         setCurrentTheme(config.theme || "dark");
         setCurrentOpacity(config.opacity !== undefined ? config.opacity : 0.25);
         setShowTutorialOnStartup(!config.onboardingCompleted);
+        setPulseEnabled(config.pulseEnabled !== false);
         
         const modelName = config.model || "gemini-2.5-flash";
         const standardModels = [
@@ -147,8 +149,15 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
           mode,
           currentTheme,
           currentOpacity,
-          !showTutorialOnStartup // onboardingCompleted
+          !showTutorialOnStartup, // onboardingCompleted
+          pulseEnabled
         );
+
+        if (pulseEnabled) {
+          document.documentElement.classList.remove('disable-pulse');
+        } else {
+          document.documentElement.classList.add('disable-pulse');
+        }
 
         await loadCurrentConfig();
         setConnectionStatus('success');
@@ -206,46 +215,34 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
       {/* Mode selection (Code vs General) */}
       <div className="space-y-2">
         <label className="text-[10px] font-bold text-muted uppercase tracking-wider block">AI Mode</label>
-        <div className="space-y-2">
+        <div className="grid grid-cols-2 gap-2">
           {/* Code Assistant */}
-          <div
+          <button
+            type="button"
             onClick={() => handleModeSwitch('code')}
-            className={`p-2.5 rounded-xl border cursor-pointer transition-all duration-200 ${
+            className={`p-2 rounded-lg border text-left flex flex-col justify-between transition-all duration-200 cursor-pointer ${
               mode === 'code'
-                ? 'bg-white/10 dark:bg-white/20 border-blue-500/50 shadow-md ring-1 ring-blue-500/20 text-primary font-medium'
+                ? 'bg-white/10 dark:bg-white/20 border-blue-500/50 text-primary shadow-sm'
                 : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 text-secondary hover:bg-black/10 dark:hover:bg-white/10'
             }`}
           >
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold flex items-center gap-1.5">
-                💻 Code Assistant (Default)
-              </span>
-              {mode === 'code' && <div className="w-2 h-2 bg-blue-500 rounded-full" />}
-            </div>
-            <p className="text-[9px] mt-0.5 leading-normal opacity-85">
-              Returns direct, concise, production-ready code.
-            </p>
-          </div>
+            <span className="text-[10px] font-bold">💻 Code Assistant</span>
+            <span className="text-[8px] mt-0.5 opacity-70">Direct code generation</span>
+          </button>
 
           {/* General Assistant */}
-          <div
+          <button
+            type="button"
             onClick={() => handleModeSwitch('general')}
-            className={`p-2.5 rounded-xl border cursor-pointer transition-all duration-200 ${
+            className={`p-2 rounded-lg border text-left flex flex-col justify-between transition-all duration-200 cursor-pointer ${
               mode === 'general'
-                ? 'bg-white/10 dark:bg-white/20 border-purple-500/50 shadow-md ring-1 ring-purple-500/20 text-primary font-medium'
+                ? 'bg-white/10 dark:bg-white/20 border-purple-500/50 text-primary shadow-sm'
                 : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 text-secondary hover:bg-black/10 dark:hover:bg-white/10'
             }`}
           >
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold flex items-center gap-1.5">
-                🌟 General Assistant
-              </span>
-              {mode === 'general' && <div className="w-2 h-2 bg-purple-500 rounded-full" />}
-            </div>
-            <p className="text-[9px] mt-0.5 leading-normal opacity-85">
-              Conversational and generic explanations.
-            </p>
-          </div>
+            <span className="text-[10px] font-bold">🌟 General Assistant</span>
+            <span className="text-[8px] mt-0.5 opacity-70">Conversational replies</span>
+          </button>
         </div>
       </div>
 
@@ -390,12 +387,44 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
           <label className="text-[10px] font-bold text-primary block uppercase tracking-wider">Show Tutorial on Startup</label>
           <span className="text-[8px] text-muted leading-normal block">Launches setup onboarding on next startup.</span>
         </div>
-        <input
-          type="checkbox"
-          checked={showTutorialOnStartup}
-          onChange={(e) => setShowTutorialOnStartup(e.target.checked)}
-          className="w-3.5 h-3.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer interactive"
-        />
+        <button
+          type="button"
+          role="switch"
+          aria-checked={showTutorialOnStartup}
+          onClick={() => setShowTutorialOnStartup(prev => !prev)}
+          className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none interactive ${
+            showTutorialOnStartup ? 'bg-blue-600' : 'bg-black/25 dark:bg-white/10'
+          }`}
+        >
+          <span
+            className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+              showTutorialOnStartup ? 'translate-x-4' : 'translate-x-0'
+            }`}
+          />
+        </button>
+      </div>
+
+      {/* Pulsing Effects */}
+      <div className="space-y-1.5 bg-black/5 dark:bg-white/5 p-2 rounded-lg border border-black/10 dark:border-white/20 flex items-center justify-between">
+        <div>
+          <label className="text-[10px] font-bold text-primary block uppercase tracking-wider">Enable Pulsing Effects</label>
+          <span className="text-[8px] text-muted leading-normal block">Toggles shimmer animations and loading pulses.</span>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={pulseEnabled}
+          onClick={() => setPulseEnabled(prev => !prev)}
+          className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none interactive ${
+            pulseEnabled ? 'bg-blue-600' : 'bg-black/25 dark:bg-white/10'
+          }`}
+        >
+          <span
+            className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+              pulseEnabled ? 'translate-x-4' : 'translate-x-0'
+            }`}
+          />
+        </button>
       </div>
 
       {/* Action buttons */}
