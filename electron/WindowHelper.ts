@@ -99,6 +99,7 @@ export class WindowHelper {
 
     this.mainWindow = new BrowserWindow(windowSettings)
     // this.mainWindow.webContents.openDevTools()
+    this.mainWindow.setOpacity(0.99)
     this.mainWindow.setContentProtection(true)
 
     if (process.platform === "darwin") {
@@ -128,6 +129,7 @@ export class WindowHelper {
       if (this.mainWindow) {
         // Center the window first
         this.centerWindow()
+        this.mainWindow.setOpacity(0.99)
         this.mainWindow.setContentProtection(true)
         this.mainWindow.show()
         this.mainWindow.focus()
@@ -209,6 +211,7 @@ export class WindowHelper {
       })
     }
 
+    this.mainWindow.setOpacity(0.99)
     this.mainWindow.setContentProtection(true)
     this.mainWindow.showInactive()
 
@@ -262,6 +265,7 @@ export class WindowHelper {
     }
 
     this.centerWindow()
+    this.mainWindow.setOpacity(0.99)
     this.mainWindow.setContentProtection(true)
     this.mainWindow.show()
     this.mainWindow.focus()
