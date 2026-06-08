@@ -185,3 +185,19 @@ button, input, select, textarea, .interactive {
   animation: shimmer 3s ease-in-out infinite;
   pointer-events: none;
 }
+
+/* Custom scrollbar styling for Chrome/Edge/Safari/Electron - matching dark/stealth HUD theme */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
