@@ -99,8 +99,15 @@ export class WindowHelper {
 
     this.mainWindow = new BrowserWindow(windowSettings)
     // this.mainWindow.webContents.openDevTools()
-    this.mainWindow.setOpacity(0.99)
-    this.mainWindow.setContentProtection(true)
+
+    // Ensure screen share protection is applied and re-applied whenever the window is shown
+    this.mainWindow.on("show", () => {
+      if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+        this.mainWindow.setOpacity(0.99)
+        this.mainWindow.setContentProtection(true)
+        console.log("Applied screen share protection on show event")
+      }
+    })
 
     if (process.platform === "darwin") {
       this.mainWindow.setVisibleOnAllWorkspaces(true, {
@@ -129,11 +136,11 @@ export class WindowHelper {
       if (this.mainWindow) {
         // Center the window first
         this.centerWindow()
-        this.mainWindow.setOpacity(0.99)
-        this.mainWindow.setContentProtection(true)
         this.mainWindow.show()
         this.mainWindow.focus()
         this.mainWindow.setAlwaysOnTop(true)
+        this.mainWindow.setOpacity(0.99)
+        this.mainWindow.setContentProtection(true)
         console.log("Window is now visible and centered")
       }
     })
@@ -211,9 +218,9 @@ export class WindowHelper {
       })
     }
 
+    this.mainWindow.showInactive()
     this.mainWindow.setOpacity(0.99)
     this.mainWindow.setContentProtection(true)
-    this.mainWindow.showInactive()
 
     this.isWindowVisible = true
   }
@@ -265,11 +272,11 @@ export class WindowHelper {
     }
 
     this.centerWindow()
-    this.mainWindow.setOpacity(0.99)
-    this.mainWindow.setContentProtection(true)
     this.mainWindow.show()
     this.mainWindow.focus()
     this.mainWindow.setAlwaysOnTop(true)
+    this.mainWindow.setOpacity(0.99)
+    this.mainWindow.setContentProtection(true)
     this.isWindowVisible = true
     
     console.log(`Window centered and shown`)
