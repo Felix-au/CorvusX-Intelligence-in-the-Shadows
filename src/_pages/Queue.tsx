@@ -10,6 +10,7 @@ import {
 } from "../components/ui/toast"
 import QueueCommands from "../components/Queue/QueueCommands"
 import ModelSelector from "../components/ui/ModelSelector"
+import { ShortcutManagerModal } from "../components/ui/ShortcutManagerModal"
 import { renderMarkdown } from "../lib/utils"
 
 interface QueueProps {
@@ -36,6 +37,7 @@ const Queue: React.FC<QueueProps> = ({ setView, opacity = 0.25, onOpacityChange 
   const [attachedScreenshots, setAttachedScreenshots] = useState<{ path: string; preview: string }[]>([])
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false)
   const [currentModel, setCurrentModel] = useState<{ provider: string; model: string }>({ provider: "gemini", model: "auto" })
   const [audioResult, setAudioResult] = useState<string | null>(null)
   const [isAudioLoading, setIsAudioLoading] = useState(false)
@@ -192,6 +194,10 @@ const Queue: React.FC<QueueProps> = ({ setView, opacity = 0.25, onOpacityChange 
     setIsSettingsOpen((prev) => !prev)
   }
 
+  const handleShortcutsToggle = () => {
+    setIsShortcutsOpen((prev) => !prev)
+  }
+
   const handleModelChange = (provider: "gemini", model: string) => {
     setCurrentModel({ provider, model })
     setChatMessages((msgs) => [...msgs, {
@@ -298,6 +304,7 @@ const Queue: React.FC<QueueProps> = ({ setView, opacity = 0.25, onOpacityChange 
               screenshots={screenshots}
               onChatToggle={handleChatToggle}
               onSettingsToggle={handleSettingsToggle}
+              onShortcutsToggle={handleShortcutsToggle}
               audioResult={audioResult}
               setAudioResult={setAudioResult}
               onClearAll={handleClearAll}
@@ -465,6 +472,10 @@ const Queue: React.FC<QueueProps> = ({ setView, opacity = 0.25, onOpacityChange 
           )}
         </div>
       </div>
+      <ShortcutManagerModal
+        isOpen={isShortcutsOpen}
+        onClose={() => setIsShortcutsOpen(false)}
+      />
     </div>
   )
 }

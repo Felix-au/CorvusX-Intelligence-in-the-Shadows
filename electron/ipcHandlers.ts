@@ -252,4 +252,25 @@ export function initializeIpcHandlers(appState: AppState): void {
       return { success: false, error: error.message };
     }
   });
+
+  ipcMain.handle("get-shortcuts", async () => {
+    try {
+      const config = appState.configHelper.loadConfig()
+      return config.shortcuts
+    } catch (error: any) {
+      console.error("Error getting shortcuts:", error)
+      throw error
+    }
+  })
+
+  ipcMain.handle("save-shortcuts", async (_, newShortcuts: any) => {
+    try {
+      appState.configHelper.updateConfig({ shortcuts: newShortcuts })
+      appState.shortcutsHelper.registerGlobalShortcuts()
+      return { success: true }
+    } catch (error: any) {
+      console.error("Error saving shortcuts:", error)
+      return { success: false, error: error.message }
+    }
+  })
 }

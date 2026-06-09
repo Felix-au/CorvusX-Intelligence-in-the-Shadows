@@ -2,6 +2,17 @@ import path from "node:path"
 import fs from "node:fs"
 import { app } from "electron"
 
+export interface AppShortcuts {
+  showCenter: string
+  screenshot: string
+  reset: string
+  toggleStealth: string
+  moveLeft: string
+  moveRight: string
+  moveUp: string
+  moveDown: string
+}
+
 export interface AppConfig {
   onboardingCompleted: boolean
   apiKey: string
@@ -12,6 +23,18 @@ export interface AppConfig {
   opacity: number
   pulseEnabled: boolean
   codingLanguage: string
+  shortcuts?: AppShortcuts
+}
+
+const DEFAULT_SHORTCUTS: AppShortcuts = {
+  showCenter: "CommandOrControl+Shift+Space",
+  screenshot: "CommandOrControl+Alt+S",
+  reset: "CommandOrControl+Alt+R",
+  toggleStealth: "CommandOrControl+Alt+B",
+  moveLeft: "CommandOrControl+Alt+Left",
+  moveRight: "CommandOrControl+Alt+Right",
+  moveUp: "CommandOrControl+Alt+Up",
+  moveDown: "CommandOrControl+Alt+Down"
 }
 
 const DEFAULT_CONFIG: AppConfig = {
@@ -23,7 +46,8 @@ const DEFAULT_CONFIG: AppConfig = {
   theme: "dark",
   opacity: 0.25,
   pulseEnabled: true,
-  codingLanguage: "Auto-Detect"
+  codingLanguage: "Auto-Detect",
+  shortcuts: DEFAULT_SHORTCUTS
 }
 
 export class ConfigHelper {
@@ -51,7 +75,8 @@ export class ConfigHelper {
         theme: "dark",
         opacity: 0.25,
         pulseEnabled: true,
-        codingLanguage: "Auto-Detect"
+        codingLanguage: "Auto-Detect",
+        shortcuts: DEFAULT_SHORTCUTS
       }
     }
 
@@ -74,7 +99,11 @@ export class ConfigHelper {
         theme: parsed.theme ?? DEFAULT_CONFIG.theme,
         opacity: parsed.opacity ?? DEFAULT_CONFIG.opacity,
         pulseEnabled: parsed.pulseEnabled ?? DEFAULT_CONFIG.pulseEnabled,
-        codingLanguage: parsed.codingLanguage ?? DEFAULT_CONFIG.codingLanguage
+        codingLanguage: parsed.codingLanguage ?? DEFAULT_CONFIG.codingLanguage,
+        shortcuts: {
+          ...DEFAULT_SHORTCUTS,
+          ...(parsed.shortcuts || {})
+        }
       }
     } catch (error) {
       console.error("[ConfigHelper] Error reading config file:", error)

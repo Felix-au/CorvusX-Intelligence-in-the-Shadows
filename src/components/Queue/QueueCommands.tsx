@@ -5,6 +5,7 @@ interface QueueCommandsProps {
   screenshots: Array<{ path: string; preview: string }>
   onChatToggle: () => void
   onSettingsToggle: () => void
+  onShortcutsToggle: () => void
   audioResult: string | null
   setAudioResult: React.Dispatch<React.SetStateAction<string | null>>
   onClearAll: () => void
@@ -19,6 +20,7 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
   screenshots: _screenshots,
   onChatToggle,
   onSettingsToggle,
+  onShortcutsToggle,
   audioResult,
   setAudioResult,
   onClearAll,
@@ -137,6 +139,18 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
             title="Toggle Settings and AI Models (Ctrl+I)"
           >
             ⚙️ Models
+          </button>
+        </div>
+
+        {/* Shortcuts Button */}
+        <div className="flex items-center gap-2">
+          <button
+            className="bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 border border-black/10 dark:border-white/10 transition-colors rounded-md px-2 py-1 text-[11px] leading-none text-primary flex items-center gap-1 cursor-pointer"
+            onClick={onShortcutsToggle}
+            type="button"
+            title="Configure global keyboard shortcuts"
+          >
+            ⌨️ Hotkeys
           </button>
         </div>
 
