@@ -15,13 +15,13 @@ export class ShortcutsHelper {
     const config = this.appState.configHelper.loadConfig()
     const shortcuts = config.shortcuts || {
       showCenter: "CommandOrControl+Shift+Space",
-      screenshot: "CommandOrControl+Alt+S",
-      reset: "CommandOrControl+Alt+R",
-      toggleStealth: "CommandOrControl+Alt+B",
-      moveLeft: "CommandOrControl+Alt+Left",
-      moveRight: "CommandOrControl+Alt+Right",
-      moveUp: "CommandOrControl+Alt+Up",
-      moveDown: "CommandOrControl+Alt+Down"
+      screenshot: "CommandOrControl+H",
+      reset: "CommandOrControl+R",
+      toggleStealth: "CommandOrControl+B",
+      moveLeft: "CommandOrControl+Left",
+      moveRight: "CommandOrControl+Right",
+      moveUp: "CommandOrControl+Up",
+      moveDown: "CommandOrControl+Down"
     }
 
     // Register showCenter shortcut

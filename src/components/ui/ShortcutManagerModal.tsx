@@ -95,31 +95,31 @@ export const ShortcutManagerModal: React.FC<ShortcutManagerModalProps> = ({
       const uniqueParts = Array.from(new Set(parts))
       setRecordedKeys(uniqueParts)
 
-      // Automatically complete recording once we have a main key pressed and total parts is at least 3
-      if (!isModifier && uniqueParts.length >= 3) {
+      // Automatically complete recording once we have a main key pressed and total parts is at least 2
+      if (!isModifier && uniqueParts.length >= 2) {
         finishRecording(uniqueParts.join("+"))
       }
     }
-
+ 
     window.addEventListener("keydown", handleKeyDown, true)
     return () => {
       window.removeEventListener("keydown", handleKeyDown, true)
     }
   }, [recordingKey])
-
+ 
   const startRecording = (key: keyof ShortcutsMap) => {
     setRecordingKey(key)
     setRecordedKeys([])
     setError(null)
     setSuccess(false)
   }
-
+ 
   const finishRecording = (shortcutString: string) => {
     if (!shortcuts) return
-
+ 
     const parts = shortcutString.split("+")
-    if (parts.length < 3) {
-      setError("Shortcut must contain at least 3 keys (e.g. Ctrl + Alt + Key)")
+    if (parts.length < 2) {
+      setError("Shortcut must contain at least 2 keys (e.g. Ctrl + Key)")
       setRecordingKey(null)
       return
     }
@@ -180,7 +180,7 @@ export const ShortcutManagerModal: React.FC<ShortcutManagerModalProps> = ({
 
       {/* Description */}
       <p className="text-[10px] text-secondary leading-relaxed">
-        Configure global hotkeys to control the overlay. All active shortcuts must use exactly 3-key combinations (e.g., modifier key + modifier key + action key).
+        Configure global hotkeys to control the overlay. All active shortcuts must use at least 2 keys (e.g., Ctrl + Key).
       </p>
 
       {/* Error/Success Feedback */}

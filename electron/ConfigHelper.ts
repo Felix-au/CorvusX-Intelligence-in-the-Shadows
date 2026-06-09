@@ -28,13 +28,13 @@ export interface AppConfig {
 
 const DEFAULT_SHORTCUTS: AppShortcuts = {
   showCenter: "CommandOrControl+Shift+Space",
-  screenshot: "CommandOrControl+Alt+S",
-  reset: "CommandOrControl+Alt+R",
-  toggleStealth: "CommandOrControl+Alt+B",
-  moveLeft: "CommandOrControl+Alt+Left",
-  moveRight: "CommandOrControl+Alt+Right",
-  moveUp: "CommandOrControl+Alt+Up",
-  moveDown: "CommandOrControl+Alt+Down"
+  screenshot: "CommandOrControl+H",
+  reset: "CommandOrControl+R",
+  toggleStealth: "CommandOrControl+B",
+  moveLeft: "CommandOrControl+Left",
+  moveRight: "CommandOrControl+Right",
+  moveUp: "CommandOrControl+Up",
+  moveDown: "CommandOrControl+Down"
 }
 
 const DEFAULT_CONFIG: AppConfig = {
@@ -89,8 +89,33 @@ export class ConfigHelper {
       const fileData = fs.readFileSync(this.configPath, "utf-8")
       const parsed = JSON.parse(fileData)
       
-      // Ensure all fields are populated correctly with fallbacks
-      return {
+      let parsedShortcuts = parsed.shortcuts || {}
+      let needsSave = false
+
+      const migrations: Record<string, string> = {
+        "CommandOrControl+Alt+S": "CommandOrControl+H",
+        "CommandOrControl+Alt+R": "CommandOrControl+R",
+        "CommandOrControl+Alt+B": "CommandOrControl+B",
+        "CommandOrControl+Alt+Left": "CommandOrControl+Left",
+        "CommandOrControl+Alt+Right": "CommandOrControl+Right",
+        "CommandOrControl+Alt+Up": "CommandOrControl+Up",
+        "CommandOrControl+Alt+Down": "CommandOrControl+Down"
+      }
+
+      for (const key of Object.keys(parsedShortcuts)) {
+        const val = parsedShortcuts[key]
+        if (migrations[val]) {
+          parsedShortcuts[key] = migrations[val]
+          needsSave = true
+        }
+      }
+
+      const mergedShortcuts = {
+        ...DEFAULT_SHORTCUTS,
+        ...parsedShortcuts
+      }
+
+      const loadedConfig: AppConfig = {
         onboardingCompleted: parsed.onboardingCompleted ?? DEFAULT_CONFIG.onboardingCompleted,
         apiKey: parsed.apiKey ?? DEFAULT_CONFIG.apiKey,
         provider: parsed.provider ?? DEFAULT_CONFIG.provider,
@@ -100,11 +125,14 @@ export class ConfigHelper {
         opacity: parsed.opacity ?? DEFAULT_CONFIG.opacity,
         pulseEnabled: parsed.pulseEnabled ?? DEFAULT_CONFIG.pulseEnabled,
         codingLanguage: parsed.codingLanguage ?? DEFAULT_CONFIG.codingLanguage,
-        shortcuts: {
-          ...DEFAULT_SHORTCUTS,
-          ...(parsed.shortcuts || {})
-        }
+        shortcuts: mergedShortcuts
       }
+
+      if (needsSave) {
+        this.saveConfig(loadedConfig)
+      }
+
+      return loadedConfig
     } catch (error) {
       console.error("[ConfigHelper] Error reading config file:", error)
       return { ...DEFAULT_CONFIG }
