@@ -9,23 +9,21 @@ interface ShortcutManagerModalProps {
 interface ShortcutsMap {
   showCenter: string
   screenshot: string
-  reset: string
   toggleStealth: string
-  moveLeft: string
-  moveRight: string
-  moveUp: string
-  moveDown: string
+  toggleSettings: string
+  copyLatest: string
+  newSession: string
+  declutter: string
 }
 
 const SHORTCUT_LABELS: Record<keyof ShortcutsMap, string> = {
   showCenter: "Show & Center Window",
   screenshot: "Take Screenshot",
-  reset: "Reset App Queues",
   toggleStealth: "Toggle Stealth Overlay",
-  moveLeft: "Move Window Left",
-  moveRight: "Move Window Right",
-  moveUp: "Move Window Up",
-  moveDown: "Move Window Down"
+  toggleSettings: "Toggle Settings & Models list",
+  copyLatest: "Copy Latest Response",
+  newSession: "New Chat Session",
+  declutter: "Declutter UI Display"
 }
 
 export const ShortcutManagerModal: React.FC<ShortcutManagerModalProps> = ({

@@ -49,6 +49,7 @@ declare global {
       moveWindowUp: () => Promise<void>
       moveWindowDown: () => Promise<void>
       quitApp: () => Promise<void>
+      onShortcutsUpdated: (callback: (shortcuts: any) => void) => () => void
       
       getCurrentLlmConfig: () => Promise<{ provider: "gemini" | "omnikey"; model: string; isOllama: boolean }>
       switchToGemini: (apiKey?: string, model?: string) => Promise<{ success: boolean; error?: string }>

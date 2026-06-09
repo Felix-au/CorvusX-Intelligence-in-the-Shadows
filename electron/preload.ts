@@ -34,6 +34,7 @@ interface ElectronAPI {
   analyzeAudioFile: (path: string) => Promise<{ text: string; timestamp: number }>
   analyzeImageFile: (path: string) => Promise<void>
   quitApp: () => Promise<void>
+  onShortcutsUpdated: (callback: (shortcuts: any) => void) => () => void
   
   // LLM Model Management
   getCurrentLlmConfig: () => Promise<{ provider: "gemini"; model: string; isOllama: boolean }>
@@ -167,6 +168,13 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.on(PROCESSING_EVENTS.UNAUTHORIZED, subscription)
     return () => {
       ipcRenderer.removeListener(PROCESSING_EVENTS.UNAUTHORIZED, subscription)
+    }
+  },
+  onShortcutsUpdated: (callback: (shortcuts: any) => void) => {
+    const subscription = (_event: any, shortcuts: any) => callback(shortcuts)
+    ipcRenderer.on("shortcuts-updated", subscription)
+    return () => {
+      ipcRenderer.removeListener("shortcuts-updated", subscription)
     }
   },
   moveWindowLeft: () => ipcRenderer.invoke("move-window-left"),

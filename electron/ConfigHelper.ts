@@ -5,12 +5,11 @@ import { app } from "electron"
 export interface AppShortcuts {
   showCenter: string
   screenshot: string
-  reset: string
   toggleStealth: string
-  moveLeft: string
-  moveRight: string
-  moveUp: string
-  moveDown: string
+  toggleSettings: string
+  copyLatest: string
+  newSession: string
+  declutter: string
 }
 
 export interface AppConfig {
@@ -29,12 +28,11 @@ export interface AppConfig {
 const DEFAULT_SHORTCUTS: AppShortcuts = {
   showCenter: "CommandOrControl+Shift+Space",
   screenshot: "CommandOrControl+H",
-  reset: "CommandOrControl+R",
   toggleStealth: "CommandOrControl+B",
-  moveLeft: "CommandOrControl+Left",
-  moveRight: "CommandOrControl+Right",
-  moveUp: "CommandOrControl+Up",
-  moveDown: "CommandOrControl+Down"
+  toggleSettings: "CommandOrControl+I",
+  copyLatest: "CommandOrControl+C",
+  newSession: "CommandOrControl+O",
+  declutter: "CommandOrControl+U"
 }
 
 const DEFAULT_CONFIG: AppConfig = {
@@ -92,27 +90,22 @@ export class ConfigHelper {
       let parsedShortcuts = parsed.shortcuts || {}
       let needsSave = false
 
-      const migrations: Record<string, string> = {
-        "CommandOrControl+Alt+S": "CommandOrControl+H",
-        "CommandOrControl+Alt+R": "CommandOrControl+R",
-        "CommandOrControl+Alt+B": "CommandOrControl+B",
-        "CommandOrControl+Alt+Left": "CommandOrControl+Left",
-        "CommandOrControl+Alt+Right": "CommandOrControl+Right",
-        "CommandOrControl+Alt+Up": "CommandOrControl+Up",
-        "CommandOrControl+Alt+Down": "CommandOrControl+Down"
-      }
+      const newKeys = Object.keys(DEFAULT_SHORTCUTS) as Array<keyof AppShortcuts>
+      const mergedShortcuts = { ...DEFAULT_SHORTCUTS }
 
-      for (const key of Object.keys(parsedShortcuts)) {
-        const val = parsedShortcuts[key]
-        if (migrations[val]) {
-          parsedShortcuts[key] = migrations[val]
+      for (const key of newKeys) {
+        if (parsedShortcuts[key] !== undefined) {
+          mergedShortcuts[key] = parsedShortcuts[key]
+        } else {
           needsSave = true
         }
       }
 
-      const mergedShortcuts = {
-        ...DEFAULT_SHORTCUTS,
-        ...parsedShortcuts
+      // Detect and prune any old/unused shortcut keys
+      const parsedKeys = Object.keys(parsedShortcuts)
+      const hasOldKeys = parsedKeys.some(key => !newKeys.includes(key as any))
+      if (hasOldKeys) {
+        needsSave = true
       }
 
       const loadedConfig: AppConfig = {

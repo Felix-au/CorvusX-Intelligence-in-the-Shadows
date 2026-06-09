@@ -13,6 +13,43 @@ import ModelSelector from "../components/ui/ModelSelector"
 import { ShortcutManagerModal } from "../components/ui/ShortcutManagerModal"
 import { renderMarkdown } from "../lib/utils"
 
+interface ShortcutsMap {
+  showCenter: string
+  screenshot: string
+  toggleStealth: string
+  toggleSettings: string
+  copyLatest: string
+  newSession: string
+  declutter: string
+}
+
+const matchShortcut = (e: KeyboardEvent, shortcutStr: string): boolean => {
+  if (!shortcutStr) return false
+  const parts = shortcutStr.split("+").map(p => p.trim())
+  
+  const hasCtrlOrMeta = parts.includes("CommandOrControl") || parts.includes("Ctrl")
+  const hasAlt = parts.includes("Alt")
+  const hasShift = parts.includes("Shift")
+
+  const eventCtrlOrMeta = e.ctrlKey || e.metaKey
+  if (hasCtrlOrMeta !== eventCtrlOrMeta) return false
+  if (hasAlt !== e.altKey) return false
+  if (hasShift !== e.shiftKey) return false
+
+  const actionKey = parts.find(p => !["CommandOrControl", "Ctrl", "Alt", "Shift", "Meta"].includes(p))
+  if (!actionKey) return false
+
+  let keyName = e.key
+  if (e.key === " ") keyName = "Space"
+  else if (e.key === "ArrowLeft") keyName = "Left"
+  else if (e.key === "ArrowRight") keyName = "Right"
+  else if (e.key === "ArrowUp") keyName = "Up"
+  else if (e.key === "ArrowDown") keyName = "Down"
+  else if (e.key.length === 1) keyName = e.key.toUpperCase()
+
+  return keyName.toLowerCase() === actionKey.toLowerCase()
+}
+
 interface QueueProps {
   setView: React.Dispatch<React.SetStateAction<"queue" | "solutions" | "debug">>
   opacity?: number
@@ -42,6 +79,27 @@ const Queue: React.FC<QueueProps> = ({ setView, opacity = 0.25, onOpacityChange 
   const [audioResult, setAudioResult] = useState<string | null>(null)
   const [isAudioLoading, setIsAudioLoading] = useState(false)
   const [mode, setMode] = useState<'code' | 'general'>('code')
+  const [shortcuts, setShortcuts] = useState<ShortcutsMap | null>(null)
+
+  useEffect(() => {
+    const fetchShortcuts = async () => {
+      try {
+        const data = await window.electronAPI.invoke("get-shortcuts")
+        if (data) setShortcuts(data)
+      } catch (err) {
+        console.error("Failed to load shortcuts:", err)
+      }
+    }
+    fetchShortcuts()
+
+    const unsubscribe = window.electronAPI.onShortcutsUpdated((newShortcuts: ShortcutsMap) => {
+      setShortcuts(newShortcuts)
+    })
+
+    return () => {
+      unsubscribe()
+    }
+  }, [])
 
   const barRef = useRef<HTMLDivElement>(null)
 
@@ -226,18 +284,26 @@ const Queue: React.FC<QueueProps> = ({ setView, opacity = 0.25, onOpacityChange 
     setAudioResult(null)
   }
 
-  // Keyboard shortcuts: Ctrl+U (De-clutter UI), Ctrl+O (New Chat Context), Ctrl+C (Copy Latest Response), Ctrl+I (Toggle Settings/Models)
+  // Keyboard shortcuts: De-clutter UI, New Chat Context, Copy Latest Response, Toggle Settings/Models
   useEffect(() => {
     const handleKeyDown = async (e: KeyboardEvent) => {
+      // Keep Q hardcoded as exit shortcut
       const isCtrlOrMeta = e.ctrlKey || e.metaKey
       const key = e.key.toLowerCase()
+      if (isCtrlOrMeta && key === "q") {
+        e.preventDefault()
+        window.electronAPI.quitApp()
+        return
+      }
 
-      if (isCtrlOrMeta && key === "u") {
+      if (!shortcuts) return
+
+      if (matchShortcut(e, shortcuts.declutter)) {
         e.preventDefault()
         handleClearAll()
       }
 
-      if (isCtrlOrMeta && key === "o") {
+      else if (matchShortcut(e, shortcuts.newSession)) {
         e.preventDefault()
         handleClearAll()
         try {
@@ -247,17 +313,12 @@ const Queue: React.FC<QueueProps> = ({ setView, opacity = 0.25, onOpacityChange 
         }
       }
 
-      if (isCtrlOrMeta && key === "i") {
+      else if (matchShortcut(e, shortcuts.toggleSettings)) {
         e.preventDefault()
         handleSettingsToggle()
       }
 
-      if (isCtrlOrMeta && key === "q") {
-        e.preventDefault()
-        window.electronAPI.quitApp()
-      }
-
-      if (isCtrlOrMeta && key === "c") {
+      else if (matchShortcut(e, shortcuts.copyLatest)) {
         const selection = window.getSelection()?.toString()
         if (!selection) {
           e.preventDefault()
@@ -266,10 +327,10 @@ const Queue: React.FC<QueueProps> = ({ setView, opacity = 0.25, onOpacityChange 
           let textToCopy = latestChatMsg || audioResult
           if (textToCopy) {
             // Strip markdown code block wrapper if it is a single code block response
-            const codeBlockRegex = /^```(?:\w*)\n([\s\S]*?)```$/;
-            const match = codeBlockRegex.exec(textToCopy.trim());
+            const codeBlockRegex = /^```(?:\w*)\n([\s\S]*?)```$/
+            const match = codeBlockRegex.exec(textToCopy.trim())
             if (match) {
-              textToCopy = match[1].trim();
+              textToCopy = match[1].trim()
             }
             navigator.clipboard.writeText(textToCopy)
           }
@@ -280,7 +341,7 @@ const Queue: React.FC<QueueProps> = ({ setView, opacity = 0.25, onOpacityChange 
     return () => {
       window.removeEventListener("keydown", handleKeyDown)
     }
-  }, [audioResult, chatMessages])
+  }, [audioResult, chatMessages, shortcuts])
 
   return (
     <div

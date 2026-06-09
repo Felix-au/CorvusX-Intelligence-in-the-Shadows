@@ -267,6 +267,12 @@ export function initializeIpcHandlers(appState: AppState): void {
     try {
       appState.configHelper.updateConfig({ shortcuts: newShortcuts })
       appState.shortcutsHelper.registerGlobalShortcuts()
+      
+      const mainWindow = appState.getMainWindow()
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send("shortcuts-updated", newShortcuts)
+      }
+      
       return { success: true }
     } catch (error: any) {
       console.error("Error saving shortcuts:", error)
