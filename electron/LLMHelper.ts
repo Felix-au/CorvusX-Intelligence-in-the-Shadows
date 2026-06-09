@@ -339,6 +339,10 @@ export class LLMHelper {
     try {
       const audioData = await fs.promises.readFile(audioPath);
 
+      if (this.keyType === 'omnikey-gemini') {
+        throw new Error("Voice recording/transcription is only supported for OmniKey OpenAI format keys (keys starting with 'omnikey-' without 'g-').");
+      }
+
       if (this.keyType !== 'gemini') {
         console.log("[LLMHelper] Transcribing audio via OmniKey STT API");
         const transcript = await this.transcribeAudioWithOmniKey(
@@ -374,6 +378,10 @@ export class LLMHelper {
 
   public async analyzeAudioFromBase64(data: string, mimeType: string) {
     try {
+      if (this.keyType === 'omnikey-gemini') {
+        throw new Error("Voice recording/transcription is only supported for OmniKey OpenAI format keys (keys starting with 'omnikey-' without 'g-').");
+      }
+
       if (this.keyType !== 'gemini') {
         console.log("[LLMHelper] Transcribing audio via OmniKey STT API (Base64)");
         const buffer = Buffer.from(data, "base64");
