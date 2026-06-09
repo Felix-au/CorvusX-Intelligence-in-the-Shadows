@@ -252,6 +252,11 @@ const Queue: React.FC<QueueProps> = ({ setView, opacity = 0.25, onOpacityChange 
         handleSettingsToggle()
       }
 
+      if (isCtrlOrMeta && key === "q") {
+        e.preventDefault()
+        window.electronAPI.quitApp()
+      }
+
       if (isCtrlOrMeta && key === "c") {
         const selection = window.getSelection()?.toString()
         if (!selection) {
