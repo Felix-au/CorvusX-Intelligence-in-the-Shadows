@@ -252,8 +252,14 @@ const Queue: React.FC<QueueProps> = ({ setView, opacity = 0.25, onOpacityChange 
           e.preventDefault()
           const geminiMsgs = chatMessages.filter(m => m.role === "gemini")
           const latestChatMsg = geminiMsgs.length > 0 ? geminiMsgs[geminiMsgs.length - 1].text : null
-          const textToCopy = latestChatMsg || audioResult
+          let textToCopy = latestChatMsg || audioResult
           if (textToCopy) {
+            // Strip markdown code block wrapper if it is a single code block response
+            const codeBlockRegex = /^```(?:\w*)\n([\s\S]*?)```$/;
+            const match = codeBlockRegex.exec(textToCopy.trim());
+            if (match) {
+              textToCopy = match[1].trim();
+            }
             navigator.clipboard.writeText(textToCopy)
           }
         }
