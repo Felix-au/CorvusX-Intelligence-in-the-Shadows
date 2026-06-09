@@ -161,94 +161,92 @@ export const ShortcutManagerModal: React.FC<ShortcutManagerModalProps> = ({
   }
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-md animate-fadeIn">
-      <div className="relative w-full max-w-[400px] p-5 rounded-2xl border border-white/20 bg-black/75 backdrop-blur-xl shadow-2xl text-left select-none text-primary">
-        {/* Header */}
-        <div className="flex justify-between items-center pb-3 border-b border-white/10 mb-4">
-          <div className="flex items-center gap-2">
-            <Keyboard className="w-5 h-5 text-blue-400" />
-            <h2 className="text-sm font-extrabold uppercase tracking-wide">
-              Keyboard Shortcuts
-            </h2>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-1 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
-          >
-            <X className="w-4 h-4 text-muted" />
-          </button>
+    <div className="p-4 liquid-glass rounded-lg border border-black/10 dark:border-white/20 space-y-4 text-left select-none text-primary">
+      {/* Header */}
+      <div className="flex justify-between items-center pb-2 border-b border-black/10 dark:border-white/10">
+        <div className="flex items-center gap-2">
+          <Keyboard className="w-5 h-5 text-blue-500" />
+          <h2 className="text-xs font-extrabold uppercase tracking-wide text-primary">
+            Keyboard Shortcuts
+          </h2>
         </div>
+        <button
+          onClick={onClose}
+          className="p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
+        >
+          <X className="w-4 h-4 text-muted" />
+        </button>
+      </div>
 
-        {/* Description */}
-        <p className="text-[10px] text-muted leading-relaxed mb-4">
-          Configure global hotkeys to control the overlay. All active shortcuts must use exactly 3-key combinations (e.g., modifier key + modifier key + action key).
-        </p>
+      {/* Description */}
+      <p className="text-[10px] text-secondary leading-relaxed">
+        Configure global hotkeys to control the overlay. All active shortcuts must use exactly 3-key combinations (e.g., modifier key + modifier key + action key).
+      </p>
 
-        {/* Error/Success Feedback */}
-        {error && (
-          <div className="mb-4 p-2.5 rounded-lg border border-red-500/30 bg-red-500/10 text-[10px] font-semibold text-red-400 flex items-center gap-1.5 animate-pulse">
-            <AlertCircle className="w-4 h-4 shrink-0" />
-            <span>{error}</span>
-          </div>
-        )}
+      {/* Error/Success Feedback */}
+      {error && (
+        <div className="p-2.5 rounded-lg border border-red-500/30 bg-red-500/10 text-[10px] font-semibold text-red-500 dark:text-red-400 flex items-center gap-1.5 animate-pulse">
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
 
-        {success && (
-          <div className="mb-4 p-2.5 rounded-lg border border-green-500/30 bg-green-500/10 text-[10px] font-semibold text-green-400 flex items-center gap-1.5 animate-pulse">
-            <Check className="w-4 h-4 shrink-0" />
-            <span>Shortcuts updated and applied!</span>
-          </div>
-        )}
+      {success && (
+        <div className="p-2.5 rounded-lg border border-green-500/30 bg-green-500/10 text-[10px] font-semibold text-green-600 dark:text-green-400 flex items-center gap-1.5 animate-pulse">
+          <Check className="w-4 h-4 shrink-0" />
+          <span>Shortcuts updated and applied!</span>
+        </div>
+      )}
 
-        {/* Shortcuts list */}
-        <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
-          {shortcuts &&
-            Object.keys(SHORTCUT_LABELS).map((key) => {
-              const shortcutKey = key as keyof ShortcutsMap
-              const isRecording = recordingKey === shortcutKey
+      {/* Shortcuts list */}
+      <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
+        {shortcuts &&
+          Object.keys(SHORTCUT_LABELS).map((key) => {
+            const shortcutKey = key as keyof ShortcutsMap
+            const isRecording = recordingKey === shortcutKey
 
-              return (
-                <div
-                  key={shortcutKey}
-                  className="flex items-center justify-between p-2.5 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 transition-all"
+            return (
+              <div
+                key={shortcutKey}
+                className="flex items-center justify-between p-2.5 rounded-xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-all"
+              >
+                <span className="text-[11px] font-semibold text-secondary">
+                  {SHORTCUT_LABELS[shortcutKey]}
+                </span>
+                <button
+                  onClick={() => startRecording(shortcutKey)}
+                  className={`px-3 py-1.5 rounded-lg text-[10px] font-mono font-bold border transition-all cursor-pointer ${
+                    isRecording
+                      ? "border-blue-500 bg-blue-500/20 text-blue-500 dark:text-blue-300 animate-pulse"
+                      : "border-black/10 dark:border-white/20 bg-black/5 dark:bg-white/10 text-blue-600 dark:text-blue-400 hover:border-black/20 dark:hover:border-white/30 hover:text-primary"
+                  }`}
                 >
-                  <span className="text-[11px] font-semibold text-secondary">
-                    {SHORTCUT_LABELS[shortcutKey]}
-                  </span>
-                  <button
-                    onClick={() => startRecording(shortcutKey)}
-                    className={`px-3 py-1.5 rounded-lg text-[10px] font-mono font-bold border transition-all cursor-pointer ${
-                      isRecording
-                        ? "border-blue-500 bg-blue-500/20 text-blue-300 animate-pulse"
-                        : "border-white/10 bg-black/40 text-blue-400 hover:border-white/20 hover:text-white"
-                    }`}
-                  >
-                    {isRecording
-                      ? recordedKeys.length > 0
-                        ? formatDisplay(recordedKeys.join("+"))
-                        : "Press keys..."
-                      : formatDisplay(shortcuts[shortcutKey])}
-                  </button>
-                </div>
-              )
-            })}
-        </div>
+                  {isRecording
+                    ? recordedKeys.length > 0
+                      ? formatDisplay(recordedKeys.join("+"))
+                      : "Press keys..."
+                    : formatDisplay(shortcuts[shortcutKey])}
+                </button>
+              </div>
+            )
+          })}
+      </div>
 
-        {/* Footer actions */}
-        <div className="flex gap-2 pt-4 border-t border-white/10 mt-4">
-          <button
-            onClick={handleSave}
-            disabled={recordingKey !== null}
-            className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-xs font-bold rounded-lg transition-all shadow-md cursor-pointer text-center"
-          >
-            Apply Changes
-          </button>
-          <button
-            onClick={onClose}
-            className="px-4 py-2 bg-gray-700 hover:bg-gray-800 text-white text-xs font-bold rounded-lg transition-all cursor-pointer text-center"
-          >
-            Cancel
-          </button>
-        </div>
+      {/* Footer actions */}
+      <div className="flex gap-2 pt-2 border-t border-black/10 dark:border-white/10">
+        <button
+          onClick={handleSave}
+          disabled={recordingKey !== null}
+          className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-xs font-bold rounded-lg transition-all shadow-md cursor-pointer text-center"
+        >
+          Apply Changes
+        </button>
+        <button
+          onClick={onClose}
+          className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-xs font-bold rounded-lg transition-all cursor-pointer text-center"
+        >
+          Cancel
+        </button>
       </div>
     </div>
   )

@@ -363,6 +363,16 @@ const Queue: React.FC<QueueProps> = ({ setView, opacity = 0.25, onOpacityChange 
             </div>
           )}
 
+          {/* Conditional Keyboard Shortcuts Interface (broader space) */}
+          {isShortcutsOpen && (
+            <div className="mt-4 w-full max-w-[600px]">
+              <ShortcutManagerModal
+                isOpen={isShortcutsOpen}
+                onClose={() => setIsShortcutsOpen(false)}
+              />
+            </div>
+          )}
+
           {/* Conditional Chat Interface (broader space) */}
           {isChatOpen && (
             <div className="mt-4 w-full max-w-[600px] liquid-glass chat-container p-4 flex flex-col text-left">
@@ -472,10 +482,6 @@ const Queue: React.FC<QueueProps> = ({ setView, opacity = 0.25, onOpacityChange 
           )}
         </div>
       </div>
-      <ShortcutManagerModal
-        isOpen={isShortcutsOpen}
-        onClose={() => setIsShortcutsOpen(false)}
-      />
     </div>
   )
 }
