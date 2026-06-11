@@ -10,10 +10,10 @@ interface ModelSelectorProps {
   onOpacityChange?: (opacity: number) => void;
 }
 
-const ModelSelector: React.FC<ModelSelectorProps> = ({ 
-  onModelChange, 
-  onChatOpen, 
-  mode: propMode, 
+const ModelSelector: React.FC<ModelSelectorProps> = ({
+  onModelChange,
+  onChatOpen,
+  mode: propMode,
   onModeSwitch,
   opacity: propOpacity,
   onOpacityChange
@@ -26,10 +26,10 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
   const [customGeminiModel, setCustomGeminiModel] = useState<string>("");
   const [showCustomModelInput, setShowCustomModelInput] = useState<boolean>(false);
   const [mode, setMode] = useState<'code' | 'general'>(propMode || 'code');
-  
+
   const [connectionStatus, setConnectionStatus] = useState<'testing' | 'success' | 'error' | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>('');
-  
+
   const [currentTheme, setCurrentTheme] = useState<"light" | "dark">("dark");
   const [currentOpacity, setCurrentOpacity] = useState<number>(propOpacity !== undefined ? propOpacity : 0.25);
   const [showTutorialOnStartup, setShowTutorialOnStartup] = useState(false);
@@ -66,7 +66,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
         setShowTutorialOnStartup(!config.onboardingCompleted);
         setPulseEnabled(config.pulseEnabled !== false);
         setCodingLanguage(config.codingLanguage || "Auto-Detect");
-        
+
         const modelName = config.model || "gemini-2.5-flash";
         const standardModels = [
           "auto",
@@ -76,7 +76,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
           "gemini-3.1-flash-lite-preview",
           "gemini-2.5-flash-lite"
         ];
-        
+
         if (standardModels.includes(modelName)) {
           setSelectedGeminiModel(modelName);
           setShowCustomModelInput(false);
@@ -110,7 +110,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
     try {
       setConnectionStatus('testing');
       setErrorMessage('');
-      
+
       let keyToTest = geminiApiKey.trim();
       if (provider === "omnikey" && !keyToTest.startsWith("omnikey-")) {
         keyToTest = "omnikey-" + keyToTest;
@@ -132,7 +132,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
     try {
       setConnectionStatus('testing');
       setErrorMessage('');
-      
+
       let keyToUse = geminiApiKey.trim();
       if (provider === "omnikey" && !keyToUse.startsWith("omnikey-")) {
         keyToUse = "omnikey-" + keyToUse;
@@ -165,7 +165,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
         await loadCurrentConfig();
         setConnectionStatus('success');
         onModelChange?.("gemini", modelToUse);
-        
+
         // Auto-open chat window after successful model change
         setTimeout(() => {
           onChatOpen?.();
@@ -223,11 +223,10 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
           <button
             type="button"
             onClick={() => handleModeSwitch('code')}
-            className={`p-2 rounded-lg border text-left flex flex-col justify-between transition-all duration-200 cursor-pointer ${
-              mode === 'code'
-                ? 'bg-white/10 dark:bg-white/20 border-blue-500/50 text-primary shadow-sm'
-                : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 text-secondary hover:bg-black/10 dark:hover:bg-white/10'
-            }`}
+            className={`p-2 rounded-lg border text-left flex flex-col justify-between transition-all duration-200 cursor-pointer ${mode === 'code'
+              ? 'bg-white/10 dark:bg-white/20 border-blue-500/50 text-primary shadow-sm'
+              : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 text-secondary hover:bg-black/10 dark:hover:bg-white/10'
+              }`}
           >
             <span className="text-[10px] font-bold">💻 Code Assistant</span>
             <span className="text-[8px] mt-0.5 opacity-70">Direct code generation</span>
@@ -237,11 +236,10 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
           <button
             type="button"
             onClick={() => handleModeSwitch('general')}
-            className={`p-2 rounded-lg border text-left flex flex-col justify-between transition-all duration-200 cursor-pointer ${
-              mode === 'general'
-                ? 'bg-white/10 dark:bg-white/20 border-purple-500/50 text-primary shadow-sm'
-                : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 text-secondary hover:bg-black/10 dark:hover:bg-white/10'
-            }`}
+            className={`p-2 rounded-lg border text-left flex flex-col justify-between transition-all duration-200 cursor-pointer ${mode === 'general'
+              ? 'bg-white/10 dark:bg-white/20 border-purple-500/50 text-primary shadow-sm'
+              : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 text-secondary hover:bg-black/10 dark:hover:bg-white/10'
+              }`}
           >
             <span className="text-[10px] font-bold">🌟 General Assistant</span>
             <span className="text-[8px] mt-0.5 opacity-70">Conversational replies</span>
@@ -285,11 +283,10 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
               setProvider("gemini");
               setConnectionStatus(null);
             }}
-            className={`p-2 rounded-lg border text-left flex flex-col justify-between transition-all duration-200 cursor-pointer ${
-              provider === "gemini"
-                ? "bg-white/10 dark:bg-white/20 border-blue-500/50 text-primary shadow-sm"
-                : "bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 text-secondary hover:bg-black/10 dark:hover:bg-white/10"
-            }`}
+            className={`p-2 rounded-lg border text-left flex flex-col justify-between transition-all duration-200 cursor-pointer ${provider === "gemini"
+              ? "bg-white/10 dark:bg-white/20 border-blue-500/50 text-primary shadow-sm"
+              : "bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 text-secondary hover:bg-black/10 dark:hover:bg-white/10"
+              }`}
           >
             <span className="text-[10px] font-bold">☁️ Google Gemini</span>
             <span className="text-[8px] mt-0.5 opacity-70">Direct connection</span>
@@ -302,11 +299,10 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
               setProvider("omnikey");
               setConnectionStatus(null);
             }}
-            className={`p-2 rounded-lg border text-left flex flex-col justify-between transition-all duration-200 cursor-pointer ${
-              provider === "omnikey"
-                ? "bg-white/10 dark:bg-white/20 border-purple-500/50 text-primary shadow-sm"
-                : "bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 text-secondary hover:bg-black/10 dark:hover:bg-white/10"
-            }`}
+            className={`p-2 rounded-lg border text-left flex flex-col justify-between transition-all duration-200 cursor-pointer ${provider === "omnikey"
+              ? "bg-white/10 dark:bg-white/20 border-purple-500/50 text-primary shadow-sm"
+              : "bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 text-secondary hover:bg-black/10 dark:hover:bg-white/10"
+              }`}
           >
             <span className="text-[10px] font-bold">🔑 OmniKey Proxy</span>
             <span className="text-[8px] mt-0.5 opacity-70">Reverse LLM proxy</span>
@@ -414,7 +410,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
         {/* Tutorial on Startup */}
         <div className="space-y-1.5 bg-black/5 dark:bg-white/5 p-2 rounded-lg border border-black/10 dark:border-white/20 flex items-center justify-between">
           <div>
-            <label className="text-[10px] font-bold text-primary block uppercase tracking-wider">Show On Startup</label>
+            <label className="text-[10px] font-bold text-primary block uppercase tracking-wider">Tutorial On Startup</label>
             <span className="text-[8px] text-muted leading-normal block">Launches onboarding.</span>
           </div>
           <button
@@ -422,14 +418,12 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
             role="switch"
             aria-checked={showTutorialOnStartup}
             onClick={() => setShowTutorialOnStartup(prev => !prev)}
-            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none interactive ${
-              showTutorialOnStartup ? 'bg-blue-600' : 'bg-black/25 dark:bg-white/10'
-            }`}
+            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none interactive ${showTutorialOnStartup ? 'bg-blue-600' : 'bg-black/25 dark:bg-white/10'
+              }`}
           >
             <span
-              className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                showTutorialOnStartup ? 'translate-x-4' : 'translate-x-0'
-              }`}
+              className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${showTutorialOnStartup ? 'translate-x-4' : 'translate-x-0'
+                }`}
             />
           </button>
         </div>
@@ -445,14 +439,12 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
             role="switch"
             aria-checked={pulseEnabled}
             onClick={() => setPulseEnabled(prev => !prev)}
-            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none interactive ${
-              pulseEnabled ? 'bg-blue-600' : 'bg-black/25 dark:bg-white/10'
-            }`}
+            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none interactive ${pulseEnabled ? 'bg-blue-600' : 'bg-black/25 dark:bg-white/10'
+              }`}
           >
             <span
-              className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                pulseEnabled ? 'translate-x-4' : 'translate-x-0'
-              }`}
+              className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${pulseEnabled ? 'translate-x-4' : 'translate-x-0'
+                }`}
             />
           </button>
         </div>
