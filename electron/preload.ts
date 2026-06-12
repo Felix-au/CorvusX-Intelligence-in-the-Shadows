@@ -35,11 +35,15 @@ interface ElectronAPI {
   analyzeImageFile: (path: string) => Promise<void>
   quitApp: () => Promise<void>
   onShortcutsUpdated: (callback: (shortcuts: any) => void) => () => void
+  onToggleVoiceRecording: (callback: () => void) => () => void
+  onGlobalEnterPressed: (callback: () => void) => () => void
   
   // LLM Model Management
   getCurrentLlmConfig: () => Promise<{ provider: "gemini"; model: string; isOllama: boolean }>
   switchToGemini: (apiKey?: string, model?: string) => Promise<{ success: boolean; error?: string }>
   testLlmConnection: (apiKey?: string, model?: string) => Promise<{ success: boolean; error?: string }>
+  getLlmMode: () => Promise<'code' | 'general'>
+  setLlmMode: (mode: 'code' | 'general') => Promise<void>
   
   invoke: (channel: string, ...args: any[]) => Promise<any>
 }
@@ -175,6 +179,20 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.on("shortcuts-updated", subscription)
     return () => {
       ipcRenderer.removeListener("shortcuts-updated", subscription)
+    }
+  },
+  onToggleVoiceRecording: (callback: () => void) => {
+    const subscription = () => callback()
+    ipcRenderer.on("toggle-voice-recording", subscription)
+    return () => {
+      ipcRenderer.removeListener("toggle-voice-recording", subscription)
+    }
+  },
+  onGlobalEnterPressed: (callback: () => void) => {
+    const subscription = () => callback()
+    ipcRenderer.on("global-enter-pressed", subscription)
+    return () => {
+      ipcRenderer.removeListener("global-enter-pressed", subscription)
     }
   },
   moveWindowLeft: () => ipcRenderer.invoke("move-window-left"),

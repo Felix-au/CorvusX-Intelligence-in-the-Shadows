@@ -26,6 +26,13 @@ export interface ElectronAPI {
   analyzeAudioFile: (path: string) => Promise<{ text: string; timestamp: number }>
   quitApp: () => Promise<void>
   onShortcutsUpdated: (callback: (shortcuts: any) => void) => () => void
+  onToggleVoiceRecording: (callback: () => void) => () => void
+  onGlobalEnterPressed: (callback: () => void) => () => void
+  getCurrentLlmConfig: () => Promise<{ provider: "gemini" | "omnikey"; model: string; isOllama: boolean }>
+  switchToGemini: (apiKey?: string, model?: string) => Promise<{ success: boolean; error?: string }>
+  testLlmConnection: (apiKey?: string, model?: string) => Promise<{ success: boolean; error?: string }>
+  getLlmMode: () => Promise<'code' | 'general'>
+  setLlmMode: (mode: 'code' | 'general') => Promise<void>
   invoke: (channel: string, ...args: any[]) => Promise<any>
 }
 
