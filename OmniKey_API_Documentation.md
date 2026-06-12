@@ -15,7 +15,7 @@
 - [Gemini-Compatible Request/Response Format](#gemini-compatible-requestresponse-format)
 - [Gemini Streaming Completions](#gemini-streaming-completions)
 - [Vision Modality (Multimodal)](#vision-modality-multimodal)
-- [Speech-to-Text (STT) Transcription](#speech-to-text-stt-transcription)
+- [Voice (Speech Input & Transcription)](#voice-speech-input--transcription)
 - [Text-to-Speech (TTS) Synthesis](#text-to-speech-tts-synthesis)
 - [Promo Tier Restrictions & Modalities](#promo-tier-restrictions-and-modalities)
 - [Dashboard Management APIs](#dashboard-management-apis)
@@ -60,11 +60,11 @@ Authorization: Bearer omnikey-your-unified-openai-key-here
 |---|---|---|---|---|
 | **POST** | `/v1/chat/completions` | Create a chat completion (OpenAI compatible) | Client | `chat` |
 | **POST** | `/v1/chat/completions` | Create a vision completion (OpenAI compatible) | Client | `vision` (auto-detected) |
-| **POST** | `/v1/audio/transcriptions` | Transcribe audio files to text (STT) | Client | `audio_input` |
+| **POST** | `/v1/audio/transcriptions` | Transcribe audio files to text (Voice) | Client | `audio_input` |
 | **POST** | `/v1/audio/speech` | Synthesize text to speech (TTS) | Client | `audio_output` |
 | **GET** | `/v1/models` | List all supported models (OpenAI compatible) | Client | - |
-| **POST** | `/v1beta/models/:model:generateContent` | Generate a Gemini-compatible completion | Client | `chat` / `vision` |
-| **POST** | `/v1beta/models/:model:streamGenerateContent` | Stream a Gemini-compatible completion | Client | `chat` / `vision` |
+| **POST** | `/v1beta/models/:model:generateContent` | Generate a Gemini-compatible completion | Client | `chat` / `vision` / `audio_input` / `audio_output` |
+| **POST** | `/v1beta/models/:model:streamGenerateContent` | Stream a Gemini-compatible completion | Client | `chat` / `vision` / `audio_input` / `audio_output` |
 | **GET** | `/v1beta/models` | List all supported models (Gemini format) | Client | - |
 | **GET** | `/v1beta/models/:model` | Retrieve model info details (Gemini format) | Client | - |
 | **GET** | `/api/cron-health` | Public uptime keep-alive check for cloud hosting | Public | - |
@@ -378,13 +378,16 @@ OmniKey AI supports multimodal Vision inputs via both OpenAI and Gemini compatib
 
 ---
 
-## Speech-to-Text (STT) Transcription
+## Voice (Speech Input & Transcription)
 
-The STT endpoint allows developers to transcribe audio files to text.
+OmniKey AI supports speech recognition and transcription through two standard formats:
 
-> [!NOTE]
-> STT uses the **OpenAI-compatible format only**. There is no Gemini-native equivalent endpoint for audio transcription.
+> [!IMPORTANT]
+> **Functional Differences in Voice Formats**:
+> * **OpenAI-Compatible Format (`/v1/audio/transcriptions`)**: Acts purely as a **transcription pipeline**. The gateway intercepts the upload and restricts the model (e.g. Gemini) via prompt formatting to output *verbatim text transcription only*, returning a simple `{"text": "..."}` JSON payload.
+> * **Gemini-Compatible Format (`/v1beta/models/:model:generateContent`)**: Acts as a **multimodal speech-to-response interface**. Since audio is passed natively in the contents payload, the model uses its reasoning capabilities to comprehend the speech content and *generate a conversational response* matching the prompt request, rather than just transcribing the verbatim text.
 
+### 1. OpenAI-Compatible Transcription Format
 * **Endpoint**: `POST /v1/audio/transcriptions`
 * **Full URLs**:
   * **Local**: `http://localhost:3001/v1/audio/transcriptions`
@@ -393,29 +396,57 @@ The STT endpoint allows developers to transcribe audio files to text.
 * **Content-Type**: `multipart/form-data`
 * **Modality Requirement**: `audio_input` (Automatically routed and enforced. Requires a personal Gemini key — promo tier blocked.)
 
-### Request Parameters
+#### Request Parameters
 
 | Form Key | Type | Required | Description |
 |---|---|---|---|
 | `file` | File Binary | Yes | The audio file blob to transcribe (e.g. `.wav`, `.mp3`, `.m4a`, `.ogg`). |
 | `model` | String | Yes | Target model ID (e.g. `gemini-2.5-flash` or `"auto"`). |
 
-### Success Response (`200 OK`)
+#### Success Response (`200 OK`)
 ```json
 {
   "text": "Welcome to OmniKey AI. This is a transcribed audio stream."
 }
 ```
 
+### 2. Gemini-Compatible Speech Input (Multimodal Speech-to-Response)
+Rather than a single-purpose transcription API, the Gemini format integrates audio natively as a multimodal part of general content generation. The model understands the speech input and responds to the content of the audio.
+
+* **Endpoint**: `POST /v1beta/models/:model:generateContent?key=omnikey-g-your-key`
+* **Full URLs**:
+  * **Local**: `http://localhost:3001/v1beta/models/gemini-2.5-flash:generateContent?key=omnikey-g-your-key`
+  * **Production**: `https://omnikey-ai-unified-key-manager.onrender.com/v1beta/models/gemini-2.5-flash:generateContent?key=omnikey-g-your-key`
+* **Format**: Send the audio file as base64-encoded `inlineData` inside a user part.
+* **Header flag (Optional)**: `X-Required-Modality: audio_input`
+
+#### Request Example:
+```json
+{
+  "contents": [
+    {
+      "role": "user",
+      "parts": [
+        { "text": "Describe this audio clip and answer any questions in it." },
+        {
+          "inlineData": {
+            "mimeType": "audio/wav",
+            "data": "UklGRi..."
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
 ---
 
-## Text-to-Speech (TTS) Synthesis
+## Text-to-Speech (TTS) & Audio Output
 
-The TTS endpoint allows developers to synthesize text input into high-quality speech output.
+OmniKey AI supports text-to-speech synthesis and spoken responses through two standard formats:
 
-> [!NOTE]
-> TTS uses the **OpenAI-compatible format only**. There is no Gemini-native equivalent endpoint for speech synthesis.
-
+### 1. OpenAI-Compatible Synthesis Format
 * **Endpoint**: `POST /v1/audio/speech`
 * **Full URLs**:
   * **Local**: `http://localhost:3001/v1/audio/speech`
@@ -424,7 +455,7 @@ The TTS endpoint allows developers to synthesize text input into high-quality sp
 * **Content-Type**: `application/json`
 * **Modality Requirement**: `audio_output` (Automatically routed and enforced. Requires a personal Gemini key — promo tier blocked.)
 
-### Request Payload Parameters
+#### Request Payload Parameters
 ```json
 {
   "model": "gemini-2.5-flash-preview-tts",
@@ -443,9 +474,71 @@ The TTS endpoint allows developers to synthesize text input into high-quality sp
   * `nova` $\rightarrow$ `Puck`
   * `shimmer` $\rightarrow$ `Aoede`
 
-### Response Format
+#### Response Format
 * **Content-Type**: `audio/wav`
 * **Payload**: Raw binary WAV data. The gateway automatically injects a valid 44-byte WAV container header onto Gemini's native raw PCM streams to ensure compatibility across all browsers and client audio players.
+
+### 2. Gemini-Compatible Audio Output Format
+You can request that Gemini model responses include synthesized spoken audio natively by requesting the `AUDIO` modality inside the generation config.
+
+* **Endpoint**: `POST /v1beta/models/:model:generateContent?key=omnikey-g-your-key`
+* **Full URLs**:
+  * **Local**: `http://localhost:3001/v1beta/models/gemini-2.5-flash:generateContent?key=omnikey-g-your-key`
+  * **Production**: `https://omnikey-ai-unified-key-manager.onrender.com/v1beta/models/gemini-2.5-flash:generateContent?key=omnikey-g-your-key`
+* **Format**: Pass `responseModalities: ["AUDIO"]` inside `generationConfig`. The proxy server automatically reroutes the query to a TTS-enabled model (`gemini-2.5-flash-preview-tts`) and returns base64 WAV-header-normalized audio.
+* **Header flag (Optional)**: `X-Required-Modality: audio_output`
+
+#### Request Example:
+```json
+{
+  "contents": [
+    {
+      "role": "user",
+      "parts": [{ "text": "Who are you?" }]
+    }
+  ],
+  "generationConfig": {
+    "responseModalities": ["AUDIO"],
+    "speechConfig": {
+      "voiceConfig": {
+        "prebuiltVoiceConfig": {
+          "voiceName": "Puck"
+        }
+      }
+    }
+  }
+}
+```
+
+#### Success Response (`200 OK`)
+Returns the model text response alongside the synthesized audio block inside candidate parts:
+```json
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          { "text": "I am a helpful voice assistant built by Google." },
+          {
+            "inlineData": {
+              "mimeType": "audio/wav",
+              "data": "UklGRi..."
+            }
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 25,
+    "candidatesTokenCount": 85,
+    "totalTokenCount": 110
+  }
+}
+```
 
 ---
 
@@ -453,13 +546,13 @@ The TTS endpoint allows developers to synthesize text input into high-quality sp
 
 To prevent exhaustion of pooled admin resources, strict modality-based authorization checks are enforced inside the router's key iteration loops:
 
-* **Modality Classes**: `vision`, `audio_input` (STT), and `audio_output` (TTS) are flagged as specialized capabilities.
+* **Modality Classes**: `vision`, `audio_input` (Voice), and `audio_output` (TTS) are flagged as specialized capabilities.
 * **Key Exclusions**: When processing requests categorized under these modalities, the router **skips all administrative promo funding keys** unless the user has added their own personal Gemini/OpenAI key.
 * **Rejection Error**: If a promo user attempts to invoke multimodal endpoints without adding a personal API key, the gateway returns a `403 Forbidden` response:
   ```json
   {
     "error": {
-      "message": "Multimodal capabilities (Vision, STT, TTS) are not available on the free promo tier. Please add your own Gemini API key under Keys page to use these features.",
+      "message": "Multimodal capabilities (Vision, Voice, TTS) are not available on the free promo tier. Please add your own Gemini API key under Keys page to use these features.",
       "status": 403
     }
   }
@@ -728,7 +821,48 @@ curl http://localhost:3001/v1/audio/transcriptions \
   -F "model=gemini-2.5-flash"
 ```
 
-### cURL (Gemini Compatible)
+### cURL (Gemini Multimodal Speech Input)
+```bash
+# Local: http://localhost:3001/v1beta/models/gemini-2.5-flash:generateContent?key=...
+# Production: https://omnikey-ai-unified-key-manager.onrender.com/v1beta/models/gemini-2.5-flash:generateContent?key=...
+curl -X POST "http://localhost:3001/v1beta/models/gemini-2.5-flash:generateContent?key=omnikey-g-your-unified-gemini-key-here" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [{
+      "role": "user",
+      "parts": [
+        {"text": "Transcribe and answer this audio prompt."},
+        {"inlineData": {"mimeType": "audio/wav", "data": "UklGRi..."}}
+      ]
+    }]
+  }'
+```
+
+### cURL (Gemini Audio Output Synthesis)
+```bash
+# Local: http://localhost:3001/v1beta/models/gemini-2.5-flash:generateContent?key=...
+# Production: https://omnikey-ai-unified-key-manager.onrender.com/v1beta/models/gemini-2.5-flash:generateContent?key=...
+curl -X POST "http://localhost:3001/v1beta/models/gemini-2.5-flash:generateContent?key=omnikey-g-your-unified-gemini-key-here" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [{
+      "role": "user",
+      "parts": [{"text": "Hello! Explain quantum computing in one simple spoken sentence."}]
+    }],
+    "generationConfig": {
+      "responseModalities": ["AUDIO"],
+      "speechConfig": {
+        "voiceConfig": {
+          "prebuiltVoiceConfig": {
+            "voiceName": "Puck"
+          }
+        }
+      }
+    }
+  }'
+```
+
+### cURL (Gemini Compatible Text Chat)
 ```bash
 # Local: http://localhost:3001/v1beta/models/...:generateContent?key=...
 # Production: https://omnikey-ai-unified-key-manager.onrender.com/v1beta/models/...:generateContent?key=...
