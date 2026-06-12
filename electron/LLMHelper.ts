@@ -339,11 +339,7 @@ export class LLMHelper {
     try {
       const audioData = await fs.promises.readFile(audioPath);
 
-      if (this.keyType === 'omnikey-gemini') {
-        throw new Error("Voice recording/transcription is only supported for OmniKey OpenAI format keys (keys starting with 'omnikey-' without 'g-').");
-      }
-
-      if (this.keyType !== 'gemini') {
+      if (this.keyType === 'omnikey-openai') {
         console.log("[LLMHelper] Transcribing audio via OmniKey STT API");
         const transcript = await this.transcribeAudioWithOmniKey(
           audioData,
@@ -357,19 +353,27 @@ export class LLMHelper {
         return { text, timestamp: Date.now() };
       }
 
+      // Both gemini and omnikey-gemini use native multimodal audio input
       const audioPart = {
         inlineData: {
           data: audioData.toString("base64"),
-          mimeType: "audio/mp3"
+          mimeType: audioPath.endsWith('.wav') ? 'audio/wav' : 'audio/mp3'
         }
       };
       const prompt = this.mode === 'code'
         ? `You are a candidate being interviewed for a software engineering or technical role. Please analyze this audio which contains the question/statement from the interviewer. Provide a direct, natural, and concise answer to the interviewer as the candidate. Do not suggest actions, do not list next steps, do not provide multiple options, do not explain your reasoning, and do not include meta-commentary. Provide ONLY the spoken reply.`
         : `${this.getSystemPrompt()}\n\nPlease analyze this audio. First, provide a direct, ready-to-use reply or answer that the user can say or use instantly based on the audio contents. Then, if helpful, list possible next steps or alternative suggestions. Keep the response natural, conversational, concise, and do not return structured JSON.`;
-      const result = await this.model!.generateContent([prompt, audioPart]);
-      const response = await result.response;
-      const text = response.text();
-      return { text, timestamp: Date.now() };
+
+      if (this.keyType === 'gemini') {
+        const result = await this.model!.generateContent([prompt, audioPart]);
+        const response = await result.response;
+        const text = response.text();
+        return { text, timestamp: Date.now() };
+      } else {
+        // omnikey-gemini
+        const text = await this.generateContentCall([prompt, audioPart]);
+        return { text, timestamp: Date.now() };
+      }
     } catch (error) {
       console.error("Error analyzing audio file:", error);
       throw error;
@@ -378,11 +382,7 @@ export class LLMHelper {
 
   public async analyzeAudioFromBase64(data: string, mimeType: string) {
     try {
-      if (this.keyType === 'omnikey-gemini') {
-        throw new Error("Voice recording/transcription is only supported for OmniKey OpenAI format keys (keys starting with 'omnikey-' without 'g-').");
-      }
-
-      if (this.keyType !== 'gemini') {
+      if (this.keyType === 'omnikey-openai') {
         console.log("[LLMHelper] Transcribing audio via OmniKey STT API (Base64)");
         const buffer = Buffer.from(data, "base64");
         const filename = mimeType.includes('wav') ? 'audio.wav' : 'audio.mp3';
@@ -394,6 +394,7 @@ export class LLMHelper {
         return { text, timestamp: Date.now() };
       }
 
+      // Both gemini and omnikey-gemini use native multimodal audio input
       const audioPart = {
         inlineData: {
           data,
@@ -403,10 +404,17 @@ export class LLMHelper {
       const prompt = this.mode === 'code'
         ? `You are a candidate being interviewed for a software engineering or technical role. Please analyze this audio which contains the question/statement from the interviewer. Provide a direct, natural, and concise answer to the interviewer as the candidate. Do not suggest actions, do not list next steps, do not provide multiple options, do not explain your reasoning, and do not include meta-commentary. Provide ONLY the spoken reply.`
         : `${this.getSystemPrompt()}\n\nPlease analyze this audio. First, provide a direct, ready-to-use reply or answer that the user can say or use instantly based on the audio contents. Then, if helpful, list possible next steps or alternative suggestions. Keep the response natural, conversational, concise, and do not return structured JSON.`;
-      const result = await this.model!.generateContent([prompt, audioPart]);
-      const response = await result.response;
-      const text = response.text();
-      return { text, timestamp: Date.now() };
+
+      if (this.keyType === 'gemini') {
+        const result = await this.model!.generateContent([prompt, audioPart]);
+        const response = await result.response;
+        const text = response.text();
+        return { text, timestamp: Date.now() };
+      } else {
+        // omnikey-gemini
+        const text = await this.generateContentCall([prompt, audioPart]);
+        return { text, timestamp: Date.now() };
+      }
     } catch (error) {
       console.error("Error analyzing audio from base64:", error);
       throw error;
