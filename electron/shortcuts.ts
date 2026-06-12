@@ -92,6 +92,19 @@ export class ShortcutsHelper {
       console.error("Failed to register toggleVoice shortcut:", err)
     }
 
+    // Register copyLatest shortcut
+    try {
+      globalShortcut.register(shortcuts.copyLatest, () => {
+        const mainWindow = this.appState.getMainWindow()
+        if (mainWindow) {
+          console.log("Global copy shortcut pressed...")
+          mainWindow.webContents.send("copy-latest-response")
+        }
+      })
+    } catch (err) {
+      console.error("Failed to register copyLatest shortcut:", err)
+    }
+
     // Unregister shortcuts when quitting
     app.on("will-quit", () => {
       globalShortcut.unregisterAll()
