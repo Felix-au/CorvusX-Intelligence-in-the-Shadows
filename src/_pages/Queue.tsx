@@ -78,6 +78,10 @@ const Queue: React.FC<QueueProps> = ({ setView, opacity = 0.25, onOpacityChange 
   const [currentModel, setCurrentModel] = useState<{ provider: string; model: string }>({ provider: "gemini", model: "auto" })
   const [audioResult, setAudioResult] = useState<string | null>(null)
   const [isAudioLoading, setIsAudioLoading] = useState(false)
+  const [isRecording, setIsRecording] = useState(false)
+  const isRecordingRef = useRef(false)
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const chunksRef = useRef<Blob[]>([])
   const [mode, setMode] = useState<'code' | 'general'>('code')
   const [shortcuts, setShortcuts] = useState<ShortcutsMap | null>(null)
 
@@ -171,6 +175,98 @@ const Queue: React.FC<QueueProps> = ({ setView, opacity = 0.25, onOpacityChange 
       chatInputRef.current?.focus()
     }
   }
+
+  const handleRecordingToggle = async () => {
+    if (!isRecordingRef.current) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+        const recorder = new MediaRecorder(stream)
+        chunksRef.current = []
+        recorder.ondataavailable = (e) => {
+          if (e.data && e.data.size > 0) {
+            chunksRef.current.push(e.data)
+          }
+        }
+        recorder.onstop = async () => {
+          const blob = new Blob(chunksRef.current, { type: chunksRef.current[0]?.type || 'audio/webm' })
+          chunksRef.current = []
+          const reader = new FileReader()
+          reader.onloadend = async () => {
+            const base64Data = (reader.result as string).split(',')[1]
+            try {
+              setIsAudioLoading(true)
+              const result = await window.electronAPI.analyzeAudioFromBase64(base64Data, blob.type)
+              setAudioResult(result.text)
+            } catch (err: any) {
+              const errMsg = err?.message || String(err)
+              setAudioResult('Audio analysis failed: ' + errMsg.replace(/^Error:\s*/i, ''))
+            } finally {
+              setIsAudioLoading(false)
+            }
+          }
+          reader.readAsDataURL(blob)
+        }
+        mediaRecorderRef.current = recorder
+        recorder.start()
+        isRecordingRef.current = true
+        setIsRecording(true)
+      } catch (err) {
+        setAudioResult('Could not start recording.')
+      }
+    } else {
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+        mediaRecorderRef.current.stop()
+      }
+      mediaRecorderRef.current = null
+      isRecordingRef.current = false
+      setIsRecording(false)
+    }
+  }
+
+  // Cleanup recording on unmount
+  useEffect(() => {
+    return () => {
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+        mediaRecorderRef.current.stop()
+      }
+    }
+  }, [])
+
+  // Listen to global voice recording toggle IPC event
+  useEffect(() => {
+    const unsubscribe = window.electronAPI.onToggleVoiceRecording(() => {
+      handleRecordingToggle()
+    })
+    return () => {
+      unsubscribe()
+    }
+  }, [])
+
+  // Dynamically toggle global enter registration based on chat content presence
+  useEffect(() => {
+    const hasInput = chatInput.trim() !== "" || attachedScreenshots.length > 0
+    window.electronAPI.invoke("toggle-global-enter", hasInput)
+    
+    return () => {
+      window.electronAPI.invoke("toggle-global-enter", false)
+    }
+  }, [chatInput, attachedScreenshots])
+
+  // Always invoke the latest closure of handleChatSend via mutable ref
+  const handleChatSendRef = useRef(handleChatSend)
+  useEffect(() => {
+    handleChatSendRef.current = handleChatSend
+  }, [handleChatSend])
+
+  // Listen to global enter keypress IPC event
+  useEffect(() => {
+    const unsubscribe = window.electronAPI.onGlobalEnterPressed(() => {
+      handleChatSendRef.current()
+    })
+    return () => {
+      unsubscribe()
+    }
+  }, [])
 
   // Load current model configuration and mode on mount
   useEffect(() => {
@@ -372,13 +468,13 @@ const Queue: React.FC<QueueProps> = ({ setView, opacity = 0.25, onOpacityChange 
               onSettingsToggle={handleSettingsToggle}
               onShortcutsToggle={handleShortcutsToggle}
               audioResult={audioResult}
-              setAudioResult={setAudioResult}
               onClearAll={handleClearAll}
               chatMessagesCount={chatMessages.length}
               mode={mode}
               onModeToggle={handleModeToggle}
               isAudioLoading={isAudioLoading}
-              setIsAudioLoading={setIsAudioLoading}
+              isRecording={isRecording}
+              onRecordingToggle={handleRecordingToggle}
             />
           </div>
 

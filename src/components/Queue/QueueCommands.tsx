@@ -7,13 +7,13 @@ interface QueueCommandsProps {
   onSettingsToggle: () => void
   onShortcutsToggle: () => void
   audioResult: string | null
-  setAudioResult: React.Dispatch<React.SetStateAction<string | null>>
   onClearAll: () => void
   chatMessagesCount: number
   mode: 'code' | 'general'
   onModeToggle: () => void
   isAudioLoading?: boolean;
-  setIsAudioLoading?: (loading: boolean) => void;
+  isRecording?: boolean;
+  onRecordingToggle?: () => void;
 }
 
 const QueueCommands: React.FC<QueueCommandsProps> = ({
@@ -22,57 +22,14 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
   onSettingsToggle,
   onShortcutsToggle,
   audioResult,
-  setAudioResult,
   onClearAll,
   chatMessagesCount,
   mode,
   onModeToggle,
   isAudioLoading: _isAudioLoading,
-  setIsAudioLoading
+  isRecording = false,
+  onRecordingToggle
 }) => {
-  const [isRecording, setIsRecording] = useState(false)
-  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null)
-  const chunks = useRef<Blob[]>([])
-
-  const handleRecordClick = async () => {
-    if (!isRecording) {
-      // Start recording
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-        const recorder = new MediaRecorder(stream)
-        recorder.ondataavailable = (e) => chunks.current.push(e.data)
-        recorder.onstop = async () => {
-          const blob = new Blob(chunks.current, { type: chunks.current[0]?.type || 'audio/webm' })
-          chunks.current = []
-          const reader = new FileReader()
-          reader.onloadend = async () => {
-            const base64Data = (reader.result as string).split(',')[1]
-            try {
-              setIsAudioLoading?.(true)
-              const result = await window.electronAPI.analyzeAudioFromBase64(base64Data, blob.type)
-              setAudioResult(result.text)
-            } catch (err: any) {
-              const errMsg = err?.message || String(err)
-              setAudioResult('Audio analysis failed: ' + errMsg.replace(/^Error:\s*/i, ''))
-            } finally {
-              setIsAudioLoading?.(false)
-            }
-          }
-          reader.readAsDataURL(blob)
-        }
-        setMediaRecorder(recorder)
-        recorder.start()
-        setIsRecording(true)
-      } catch (err) {
-        setAudioResult('Could not start recording.')
-      }
-    } else {
-      // Stop recording
-      mediaRecorder?.stop()
-      setIsRecording(false)
-      setMediaRecorder(null)
-    }
-  }
 
   return (
     <div className="w-fit overflow-visible">
@@ -94,7 +51,7 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
         <div className="flex items-center gap-2 shrink-0 whitespace-nowrap">
           <button
             className={`bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 border border-black/10 dark:border-white/10 transition-colors rounded-md px-2 py-1 text-[11px] leading-none text-primary flex items-center gap-1 cursor-pointer shrink-0 whitespace-nowrap ${isRecording ? 'bg-red-500/70 dark:bg-red-500/70 hover:bg-red-500/90 dark:hover:bg-red-500/90 text-white animate-pulse' : ''}`}
-            onClick={handleRecordClick}
+            onClick={onRecordingToggle}
             type="button"
           >
             {isRecording ? (
