@@ -302,4 +302,15 @@ export function initializeIpcHandlers(appState: AppState): void {
       return { success: false, error: error.message }
     }
   })
+
+  ipcMain.handle("write-to-clipboard", async (_, text: string) => {
+    try {
+      const { clipboard } = require("electron")
+      clipboard.writeText(text)
+      return { success: true }
+    } catch (error: any) {
+      console.error("Error writing to clipboard:", error)
+      return { success: false, error: error.message }
+    }
+  })
 }
