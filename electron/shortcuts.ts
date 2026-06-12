@@ -26,6 +26,11 @@ export class ShortcutsHelper {
     // Register showCenter shortcut
     try {
       globalShortcut.register(shortcuts.showCenter, () => {
+        const mainWindow = this.appState.getMainWindow()
+        if (mainWindow && mainWindow.isFocused()) {
+          console.log("showCenter global shortcut skipped because window is focused")
+          return
+        }
         console.log("Show/Center window shortcut pressed...")
         this.appState.centerAndShowWindow()
       })
@@ -38,6 +43,10 @@ export class ShortcutsHelper {
       globalShortcut.register(shortcuts.screenshot, async () => {
         const mainWindow = this.appState.getMainWindow()
         if (mainWindow) {
+          if (mainWindow.isFocused()) {
+            console.log("screenshot global shortcut skipped because window is focused")
+            return
+          }
           console.log("Taking screenshot...")
           try {
             const screenshotPath = await this.appState.takeScreenshot()
@@ -58,9 +67,13 @@ export class ShortcutsHelper {
     // Register toggleStealth shortcut
     try {
       globalShortcut.register(shortcuts.toggleStealth, () => {
+        const mainWindow = this.appState.getMainWindow()
+        if (mainWindow && mainWindow.isFocused()) {
+          console.log("toggleStealth global shortcut skipped because window is focused")
+          return
+        }
         this.appState.toggleMainWindow()
         // If window exists and we're showing it, bring it to front
-        const mainWindow = this.appState.getMainWindow()
         if (mainWindow && !this.appState.isVisible()) {
           // Force the window to the front on macOS
           if (process.platform === "darwin") {
