@@ -268,6 +268,26 @@ const Queue: React.FC<QueueProps> = ({ setView, opacity = 0.25, onOpacityChange 
     }
   }, [])
 
+  // Listen to global copy latest response IPC event
+  useEffect(() => {
+    const unsubscribe = window.electronAPI.onCopyLatestResponse(() => {
+      const geminiMsgs = chatMessages.filter(m => m.role === "gemini")
+      const latestChatMsg = geminiMsgs.length > 0 ? geminiMsgs[geminiMsgs.length - 1].text : null
+      let textToCopy = latestChatMsg || audioResult
+      if (textToCopy) {
+        const codeBlockRegex = /^```(?:\w*)\n([\s\S]*?)```$/
+        const match = codeBlockRegex.exec(textToCopy.trim())
+        if (match) {
+          textToCopy = match[1].trim()
+        }
+        window.electronAPI.invoke("write-to-clipboard", textToCopy)
+      }
+    })
+    return () => {
+      unsubscribe()
+    }
+  }, [chatMessages, audioResult])
+
   // Load current model configuration and mode on mount
   useEffect(() => {
     const loadCurrentModelAndMode = async () => {
@@ -412,25 +432,6 @@ const Queue: React.FC<QueueProps> = ({ setView, opacity = 0.25, onOpacityChange 
       else if (matchShortcut(e, shortcuts.toggleSettings)) {
         e.preventDefault()
         handleSettingsToggle()
-      }
-
-      else if (matchShortcut(e, shortcuts.copyLatest)) {
-        const selection = window.getSelection()?.toString()
-        if (!selection) {
-          e.preventDefault()
-          const geminiMsgs = chatMessages.filter(m => m.role === "gemini")
-          const latestChatMsg = geminiMsgs.length > 0 ? geminiMsgs[geminiMsgs.length - 1].text : null
-          let textToCopy = latestChatMsg || audioResult
-          if (textToCopy) {
-            // Strip markdown code block wrapper if it is a single code block response
-            const codeBlockRegex = /^```(?:\w*)\n([\s\S]*?)```$/
-            const match = codeBlockRegex.exec(textToCopy.trim())
-            if (match) {
-              textToCopy = match[1].trim()
-            }
-            navigator.clipboard.writeText(textToCopy)
-          }
-        }
       }
     }
     window.addEventListener("keydown", handleKeyDown)
