@@ -71,7 +71,7 @@ export class LLMHelper {
       let finalContent;
       const systemPrompt = this.getSystemPrompt();
 
-      if (Array.isArray(contentInput) && contentInput.length > 0 && 'role' in contentInput[0]) {
+      if (Array.isArray(contentInput) && contentInput.length > 0 && typeof contentInput[0] === 'object' && contentInput[0] !== null && 'role' in contentInput[0]) {
         finalContent = { contents: contentInput };
       } else if (typeof contentInput === 'string') {
         finalContent = `[System Instructions]\n${systemPrompt}\n\nUser Message: ${contentInput}`;
@@ -90,7 +90,7 @@ export class LLMHelper {
 
     if (this.keyType === 'omnikey-gemini') {
       let contents;
-      if (Array.isArray(contentInput) && contentInput.length > 0 && 'role' in contentInput[0]) {
+      if (Array.isArray(contentInput) && contentInput.length > 0 && typeof contentInput[0] === 'object' && contentInput[0] !== null && 'role' in contentInput[0]) {
         contents = contentInput;
       } else {
         const contentArray = Array.isArray(contentInput) ? contentInput : [contentInput]
@@ -137,7 +137,7 @@ export class LLMHelper {
     const openAiKey = this.apiKey.replace(/^omnikey-g-/, 'omnikey-')
     let messages;
 
-    if (Array.isArray(contentInput) && contentInput.length > 0 && 'role' in contentInput[0]) {
+    if (Array.isArray(contentInput) && contentInput.length > 0 && typeof contentInput[0] === 'object' && contentInput[0] !== null && 'role' in contentInput[0]) {
       messages = [
         { role: 'system', content: this.getSystemPrompt() },
         ...contentInput.map(msg => {
