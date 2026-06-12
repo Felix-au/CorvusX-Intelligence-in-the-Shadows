@@ -18,19 +18,15 @@ export class ShortcutsHelper {
       screenshot: "CommandOrControl+H",
       toggleStealth: "CommandOrControl+B",
       toggleSettings: "CommandOrControl+I",
-      copyLatest: "CommandOrControl+C",
+      copyLatest: "CommandOrControl+Alt+C",
       newSession: "CommandOrControl+O",
-      declutter: "CommandOrControl+U"
+      declutter: "CommandOrControl+U",
+      toggleVoice: "CommandOrControl+Shift+V"
     }
 
     // Register showCenter shortcut
     try {
       globalShortcut.register(shortcuts.showCenter, () => {
-        const mainWindow = this.appState.getMainWindow()
-        if (mainWindow && mainWindow.isFocused()) {
-          console.log("showCenter global shortcut skipped because window is focused")
-          return
-        }
         console.log("Show/Center window shortcut pressed...")
         this.appState.centerAndShowWindow()
       })
@@ -43,10 +39,6 @@ export class ShortcutsHelper {
       globalShortcut.register(shortcuts.screenshot, async () => {
         const mainWindow = this.appState.getMainWindow()
         if (mainWindow) {
-          if (mainWindow.isFocused()) {
-            console.log("screenshot global shortcut skipped because window is focused")
-            return
-          }
           console.log("Taking screenshot...")
           try {
             const screenshotPath = await this.appState.takeScreenshot()
@@ -67,13 +59,9 @@ export class ShortcutsHelper {
     // Register toggleStealth shortcut
     try {
       globalShortcut.register(shortcuts.toggleStealth, () => {
-        const mainWindow = this.appState.getMainWindow()
-        if (mainWindow && mainWindow.isFocused()) {
-          console.log("toggleStealth global shortcut skipped because window is focused")
-          return
-        }
         this.appState.toggleMainWindow()
         // If window exists and we're showing it, bring it to front
+        const mainWindow = this.appState.getMainWindow()
         if (mainWindow && !this.appState.isVisible()) {
           // Force the window to the front on macOS
           if (process.platform === "darwin") {
@@ -89,6 +77,19 @@ export class ShortcutsHelper {
       })
     } catch (err) {
       console.error("Failed to register toggleStealth shortcut:", err)
+    }
+
+    // Register toggleVoice shortcut
+    try {
+      globalShortcut.register(shortcuts.toggleVoice, () => {
+        const mainWindow = this.appState.getMainWindow()
+        if (mainWindow) {
+          console.log("Toggling voice recording...")
+          mainWindow.webContents.send("toggle-voice-recording")
+        }
+      })
+    } catch (err) {
+      console.error("Failed to register toggleVoice shortcut:", err)
     }
 
     // Unregister shortcuts when quitting

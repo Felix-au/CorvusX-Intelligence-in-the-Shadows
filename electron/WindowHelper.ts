@@ -9,33 +9,6 @@ const startUrl = isDev
   ? "http://localhost:5180"
   : `file://${path.join(__dirname, "../dist/index.html")}`
 
-function matchInputShortcut(input: any, shortcutStr: string): boolean {
-  if (!shortcutStr) return false
-  const parts = shortcutStr.split("+").map(p => p.trim())
-  
-  const hasCtrlOrMeta = parts.includes("CommandOrControl") || parts.includes("Ctrl")
-  const hasAlt = parts.includes("Alt")
-  const hasShift = parts.includes("Shift")
-
-  const inputCtrlOrMeta = input.control || input.meta
-  if (hasCtrlOrMeta !== inputCtrlOrMeta) return false
-  if (hasAlt !== input.alt) return false
-  if (hasShift !== input.shift) return false
-
-  const actionKey = parts.find(p => !["CommandOrControl", "Ctrl", "Alt", "Shift", "Meta"].includes(p))
-  if (!actionKey) return false
-
-  let keyName = input.key
-  if (input.key === " ") keyName = "Space"
-  else if (input.key === "ArrowLeft") keyName = "Left"
-  else if (input.key === "ArrowRight") keyName = "Right"
-  else if (input.key === "ArrowUp") keyName = "Up"
-  else if (input.key === "ArrowDown") keyName = "Down"
-  else if (input.key.length === 1) keyName = input.key.toUpperCase()
-
-  return keyName.toLowerCase() === actionKey.toLowerCase()
-}
-
 export class WindowHelper {
   private mainWindow: BrowserWindow | null = null
   private isWindowVisible: boolean = false
@@ -184,47 +157,6 @@ export class WindowHelper {
 
   private setupWindowListeners(): void {
     if (!this.mainWindow) return
-
-    this.mainWindow.webContents.on("before-input-event", (event, input) => {
-      if (input.type === "keyDown") {
-        const config = this.appState.configHelper.loadConfig()
-        const shortcuts = config.shortcuts || {
-          showCenter: "CommandOrControl+Shift+Space",
-          screenshot: "CommandOrControl+H",
-          toggleStealth: "CommandOrControl+B",
-          toggleSettings: "CommandOrControl+I",
-          copyLatest: "CommandOrControl+C",
-          newSession: "CommandOrControl+O",
-          declutter: "CommandOrControl+U"
-        }
-
-        if (matchInputShortcut(input, shortcuts.toggleStealth)) {
-          event.preventDefault()
-          this.appState.toggleMainWindow()
-          return
-        }
-
-        if (matchInputShortcut(input, shortcuts.screenshot)) {
-          event.preventDefault()
-          this.appState.takeScreenshot().then(async (screenshotPath) => {
-            const preview = await this.appState.getImagePreview(screenshotPath)
-            this.mainWindow?.webContents.send("screenshot-taken", {
-              path: screenshotPath,
-              preview
-            })
-          }).catch(err => {
-            console.error("Error capturing screenshot from before-input-event:", err)
-          })
-          return
-        }
-
-        if (matchInputShortcut(input, shortcuts.showCenter)) {
-          event.preventDefault()
-          this.appState.centerAndShowWindow()
-          return
-        }
-      }
-    })
 
     this.mainWindow.on("move", () => {
       if (this.mainWindow) {
