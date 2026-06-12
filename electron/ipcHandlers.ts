@@ -1,6 +1,6 @@
 // ipcHandlers.ts
 
-import { ipcMain, app } from "electron"
+import { ipcMain, app, globalShortcut } from "electron"
 import { AppState } from "./main"
 
 export function initializeIpcHandlers(appState: AppState): void {
@@ -276,6 +276,29 @@ export function initializeIpcHandlers(appState: AppState): void {
       return { success: true }
     } catch (error: any) {
       console.error("Error saving shortcuts:", error)
+      return { success: false, error: error.message }
+    }
+  })
+
+  ipcMain.handle("toggle-global-enter", async (_, enable: boolean) => {
+    try {
+      if (enable) {
+        if (!globalShortcut.isRegistered("Enter")) {
+          globalShortcut.register("Enter", () => {
+            const mainWindow = appState.getMainWindow()
+            if (mainWindow && !mainWindow.isDestroyed()) {
+              mainWindow.webContents.send("global-enter-pressed")
+            }
+          })
+        }
+      } else {
+        if (globalShortcut.isRegistered("Enter")) {
+          globalShortcut.unregister("Enter")
+        }
+      }
+      return { success: true }
+    } catch (error: any) {
+      console.error("Error toggling global enter:", error)
       return { success: false, error: error.message }
     }
   })
