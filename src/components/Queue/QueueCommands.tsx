@@ -53,11 +53,7 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
               setAudioResult(result.text)
             } catch (err: any) {
               const errMsg = err?.message || String(err)
-              if (errMsg.includes("Voice recording/transcription is only supported for OmniKey OpenAI format keys")) {
-                setAudioResult("Voice recording transcription is only supported for OmniKey OpenAI format keys.")
-              } else {
-                setAudioResult('Audio analysis failed.')
-              }
+              setAudioResult('Audio analysis failed: ' + errMsg.replace(/^Error:\s*/i, ''))
             } finally {
               setIsAudioLoading?.(false)
             }
