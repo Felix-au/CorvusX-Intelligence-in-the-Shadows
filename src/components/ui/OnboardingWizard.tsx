@@ -545,6 +545,32 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete, 
                     <kbd className="px-1.5 py-0.5 bg-white/30 rounded text-[9px] font-mono shadow-sm text-primary">U</kbd>
                   </div>
                 </div>
+
+                {/* Shortcut 6 */}
+                <div className="flex items-center justify-between p-2 rounded-lg bg-white/10 border border-white/15">
+                  <div className="text-[10px]">
+                    <span className="font-bold text-primary block">Copy Latest Response</span>
+                    <span className="text-secondary opacity-80">Copy latest text response to clipboard.</span>
+                  </div>
+                  <div className="flex gap-1">
+                    <kbd className="px-1.5 py-0.5 bg-white/30 rounded text-[9px] font-mono shadow-sm text-primary">⌘/Ctrl</kbd>
+                    <kbd className="px-1.5 py-0.5 bg-white/30 rounded text-[9px] font-mono shadow-sm text-primary">Alt</kbd>
+                    <kbd className="px-1.5 py-0.5 bg-white/30 rounded text-[9px] font-mono shadow-sm text-primary">C</kbd>
+                  </div>
+                </div>
+
+                {/* Shortcut 7 */}
+                <div className="flex items-center justify-between p-2 rounded-lg bg-white/10 border border-white/15">
+                  <div className="text-[10px]">
+                    <span className="font-bold text-primary block">Toggle Voice Recording</span>
+                    <span className="text-secondary opacity-80">Start or stop voice input recording globally.</span>
+                  </div>
+                  <div className="flex gap-1">
+                    <kbd className="px-1.5 py-0.5 bg-white/30 rounded text-[9px] font-mono shadow-sm text-primary">⌘/Ctrl</kbd>
+                    <kbd className="px-1.5 py-0.5 bg-white/30 rounded text-[9px] font-mono shadow-sm text-primary">Shift</kbd>
+                    <kbd className="px-1.5 py-0.5 bg-white/30 rounded text-[9px] font-mono shadow-sm text-primary">V</kbd>
+                  </div>
+                </div>
               </div>
             </div>
           )}
