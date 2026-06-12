@@ -28,6 +28,7 @@ export interface ElectronAPI {
   onShortcutsUpdated: (callback: (shortcuts: any) => void) => () => void
   onToggleVoiceRecording: (callback: () => void) => () => void
   onGlobalEnterPressed: (callback: () => void) => () => void
+  onCopyLatestResponse: (callback: () => void) => () => void
   getCurrentLlmConfig: () => Promise<{ provider: "gemini" | "omnikey"; model: string; isOllama: boolean }>
   switchToGemini: (apiKey?: string, model?: string) => Promise<{ success: boolean; error?: string }>
   testLlmConnection: (apiKey?: string, model?: string) => Promise<{ success: boolean; error?: string }>

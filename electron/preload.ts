@@ -37,6 +37,7 @@ interface ElectronAPI {
   onShortcutsUpdated: (callback: (shortcuts: any) => void) => () => void
   onToggleVoiceRecording: (callback: () => void) => () => void
   onGlobalEnterPressed: (callback: () => void) => () => void
+  onCopyLatestResponse: (callback: () => void) => () => void
   
   // LLM Model Management
   getCurrentLlmConfig: () => Promise<{ provider: "gemini"; model: string; isOllama: boolean }>
@@ -193,6 +194,13 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.on("global-enter-pressed", subscription)
     return () => {
       ipcRenderer.removeListener("global-enter-pressed", subscription)
+    }
+  },
+  onCopyLatestResponse: (callback: () => void) => {
+    const subscription = () => callback()
+    ipcRenderer.on("copy-latest-response", subscription)
+    return () => {
+      ipcRenderer.removeListener("copy-latest-response", subscription)
     }
   },
   moveWindowLeft: () => ipcRenderer.invoke("move-window-left"),
