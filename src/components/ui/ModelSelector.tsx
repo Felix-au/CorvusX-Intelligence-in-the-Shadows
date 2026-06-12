@@ -343,11 +343,6 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
             {showApiKey ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
           </button>
         </div>
-        {provider === 'omnikey' && (geminiApiKey.trim().startsWith('omnikey-g-') || geminiApiKey.trim().startsWith('g-')) && (
-          <div className="text-[10px] text-yellow-500 dark:text-yellow-400 font-semibold mt-1.5 leading-relaxed bg-yellow-500/10 border border-yellow-500/20 p-2 rounded-md">
-            ⚠️ Voice recording/transcription is only supported for OmniKey OpenAI format keys.
-          </div>
-        )}
       </div>
 
       {/* Model select */}
