@@ -10,6 +10,7 @@ export interface AppShortcuts {
   copyLatest: string
   newSession: string
   declutter: string
+  toggleVoice: string
 }
 
 export interface AppConfig {
@@ -30,9 +31,10 @@ const DEFAULT_SHORTCUTS: AppShortcuts = {
   screenshot: "CommandOrControl+H",
   toggleStealth: "CommandOrControl+B",
   toggleSettings: "CommandOrControl+I",
-  copyLatest: "CommandOrControl+C",
+  copyLatest: "CommandOrControl+Alt+C",
   newSession: "CommandOrControl+O",
-  declutter: "CommandOrControl+U"
+  declutter: "CommandOrControl+U",
+  toggleVoice: "CommandOrControl+Shift+V"
 }
 
 const DEFAULT_CONFIG: AppConfig = {
