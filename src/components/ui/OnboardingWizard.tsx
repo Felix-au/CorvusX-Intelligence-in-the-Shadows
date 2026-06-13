@@ -584,6 +584,19 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete, 
                     <kbd className="px-1.5 py-0.5 bg-white/30 rounded text-[9px] font-mono shadow-sm text-primary">X</kbd>
                   </div>
                 </div>
+
+                {/* Shortcut 9 */}
+                <div className="flex items-center justify-between p-2 rounded-lg bg-white/10 border border-white/15">
+                  <div className="text-[10px]">
+                    <span className="font-bold text-primary block">Ghost Writer (Simulate Typing)</span>
+                    <span className="text-secondary opacity-80">Simulate typing the latest response character-by-character with smart auto-indentation handling to prevent IDE formatting conflicts.</span>
+                  </div>
+                  <div className="flex gap-1">
+                    <kbd className="px-1.5 py-0.5 bg-white/30 rounded text-[9px] font-mono shadow-sm text-primary">⌘/Ctrl</kbd>
+                    <kbd className="px-1.5 py-0.5 bg-white/30 rounded text-[9px] font-mono shadow-sm text-primary">Alt</kbd>
+                    <kbd className="px-1.5 py-0.5 bg-white/30 rounded text-[9px] font-mono shadow-sm text-primary">K</kbd>
+                  </div>
+                </div>
               </div>
             </div>
           )}
