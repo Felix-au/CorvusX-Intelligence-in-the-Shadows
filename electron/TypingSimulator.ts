@@ -1,5 +1,4 @@
 import { uIOhook } from "uiohook-napi"
-import { clipboard } from "electron"
 import { AppState } from "./main"
 
 const CHAR_TO_KEY: Record<string, { code: number; shift?: boolean }> = {
@@ -77,81 +76,49 @@ export class TypingSimulator {
     if (!text) return
 
     this.isTyping = true
-    console.log("[TypingSimulator] Starting typing simulation...")
+    console.log("[TypingSimulator] Starting typing simulation after 2 seconds delay...")
 
-    // Backup the user's current clipboard
-    const originalClipboard = clipboard.readText()
+    // 2-second delay before starting typing (responsive to cancellation)
+    for (let i = 0; i < 20; i++) {
+      await this.sleep(100)
+      if (!this.isTyping) {
+        console.log("[TypingSimulator] Typing simulation cancelled during initial delay")
+        return
+      }
+    }
 
     try {
-      // Split the text into lines, keeping track of exact characters
+      // Split the text into lines
       const lines = text.split(/\r?\n/)
 
       for (let i = 0; i < lines.length; i++) {
         if (!this.isTyping) break
 
         const line = lines[i]
+        const cleanLine = line.trimStart()
 
-        // On newlines (except the very first line), type Enter and handle auto-indentation
+        // On newlines (except the very first line), type Enter
         if (i > 0) {
-          // 1. Send Enter key
+          // Send Enter key
           uIOhook.keyTap(28)
-          
-          // 2. Wait a brief moment for the editor to apply auto-indentation
-          await this.sleep(60)
+          // Wait a brief moment for the editor to process the Enter key and auto-indent
+          await this.sleep(100)
           if (!this.isTyping) break
+        }
 
-          // 3. Probing: Copy auto-indented whitespace using clipboard
-          // Clear clipboard first to avoid reading stale data
-          clipboard.writeText("")
-          
-          // Select to the beginning of the line (Shift + Home) twice to cover column 0
-          uIOhook.keyToggle(42, "down") // Shift down
-          uIOhook.keyTap(3655)          // Home
-          uIOhook.keyTap(3655)          // Home
-          uIOhook.keyToggle(42, "up")   // Shift up
-
-          // Copy selected text (Ctrl + C)
-          uIOhook.keyToggle(29, "down") // Ctrl down
-          uIOhook.keyTap(46)            // C
-          uIOhook.keyToggle(29, "up")   // Ctrl up
-
-          await this.sleep(40)
-          const autoIndent = clipboard.readText()
-
-          // Calculate required indentation for the current line
-          const match = line.match(/^(\s*)/)
-          const requiredIndent = match ? match[1] : ""
-
-          if (autoIndent === requiredIndent) {
-            // Case A: Ideal match. Move cursor back to the end of the indentation
-            uIOhook.keyTap(57421) // Right Arrow (unselects and puts cursor at end of whitespace)
-            await this.typeString(line.slice(requiredIndent.length))
-          } else if (requiredIndent.startsWith(autoIndent) && autoIndent.length > 0) {
-            // Case B: Partially matching. Type remaining spaces
-            uIOhook.keyTap(57421) // Right Arrow
-            const missingIndent = requiredIndent.slice(autoIndent.length)
-            await this.typeString(missingIndent + line.slice(requiredIndent.length))
-          } else {
-            // Case C & D: Over-indented or completely mismatched (like exiting a block)
-            // Clear the auto-indent (selected by Shift+Home) by pressing Backspace
-            uIOhook.keyTap(14)    // Backspace (deletes selected auto-indented whitespace)
-            await this.sleep(20)
-            await this.typeString(line)
-          }
-        } else {
-          // First line: type normally
-          await this.typeString(line)
+        // Type the line with leading spaces stripped
+        if (cleanLine.length > 0) {
+          await this.typeString(cleanLine)
         }
 
         // Add a small delay between lines for realism and editor buffer safety
-        await this.sleep(80)
+        const lineDelay = Math.floor(Math.random() * 100) + 100
+        await this.sleep(lineDelay)
       }
     } catch (err) {
       console.error("[TypingSimulator] Error during typing simulation:", err)
     } finally {
       this.isTyping = false
-      // Restore user's clipboard
-      clipboard.writeText(originalClipboard)
       console.log("[TypingSimulator] Typing simulation finished")
     }
   }
@@ -169,8 +136,8 @@ export class TypingSimulator {
         }
       }
 
-      // Random delay between keystrokes to mimic human typing (20ms - 40ms)
-      const delay = Math.floor(Math.random() * 20) + 20
+      // Random delay between keystrokes to mimic human typing (100ms - 250ms)
+      const delay = Math.floor(Math.random() * 150) + 100
       await this.sleep(delay)
     }
   }
