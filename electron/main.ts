@@ -5,6 +5,7 @@ import { ScreenshotHelper } from "./ScreenshotHelper"
 import { ShortcutsHelper } from "./shortcuts"
 import { ProcessingHelper } from "./ProcessingHelper"
 import { ConfigHelper } from "./ConfigHelper"
+import { GhostKeyboardHelper } from "./GhostKeyboardHelper"
 
 export class AppState {
   private static instance: AppState | null = null
@@ -14,6 +15,7 @@ export class AppState {
   public shortcutsHelper: ShortcutsHelper
   public processingHelper: ProcessingHelper
   public configHelper: ConfigHelper
+  public ghostKeyboardHelper: GhostKeyboardHelper
   private tray: Tray | null = null
 
   // View management
@@ -62,6 +64,9 @@ export class AppState {
 
     // Initialize ShortcutsHelper
     this.shortcutsHelper = new ShortcutsHelper(this)
+
+    // Initialize GhostKeyboardHelper
+    this.ghostKeyboardHelper = new GhostKeyboardHelper(this)
   }
 
   public static getInstance(): AppState {
