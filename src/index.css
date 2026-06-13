@@ -210,3 +210,18 @@ button, input, select, textarea, .interactive {
   transition: none !important;
 }
 
+@keyframes pulse-border-glow {
+  0%, 100% {
+    box-shadow: 0 0 4px rgba(168, 85, 247, 0.2), 0 8px 32px rgba(0, 0, 0, 0.2);
+    border-color: rgba(168, 85, 247, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(168, 85, 247, 0.6), 0 8px 32px rgba(0, 0, 0, 0.3);
+    border-color: rgba(168, 85, 247, 0.8);
+  }
+}
+
+.animate-pulse-border {
+  animation: pulse-border-glow 2s infinite ease-in-out;
+}
+
