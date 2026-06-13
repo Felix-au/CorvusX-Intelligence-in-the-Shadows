@@ -40,6 +40,7 @@ interface ElectronAPI {
   onCopyLatestResponse: (callback: () => void) => () => void
   onToggleGhostMode: (callback: (isActive: boolean) => void) => () => void
   onGhostKeypress: (callback: (data: { char: string; action: "append" | "backspace" | "clear" | "submit" }) => void) => () => void
+  onSimulateLatestResponse: (callback: () => void) => () => void
   
   // LLM Model Management
   getCurrentLlmConfig: () => Promise<{ provider: "gemini"; model: string; isOllama: boolean }>
@@ -217,6 +218,13 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.on("ghost-keypress", subscription)
     return () => {
       ipcRenderer.removeListener("ghost-keypress", subscription)
+    }
+  },
+  onSimulateLatestResponse: (callback: () => void) => {
+    const subscription = () => callback()
+    ipcRenderer.on("simulate-latest-response", subscription)
+    return () => {
+      ipcRenderer.removeListener("simulate-latest-response", subscription)
     }
   },
   moveWindowLeft: () => ipcRenderer.invoke("move-window-left"),
