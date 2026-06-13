@@ -84,6 +84,7 @@ const Queue: React.FC<QueueProps> = ({ setView, opacity = 0.25, onOpacityChange 
   const chunksRef = useRef<Blob[]>([])
   const [mode, setMode] = useState<'code' | 'general'>('code')
   const [shortcuts, setShortcuts] = useState<ShortcutsMap | null>(null)
+  const [isGhostActive, setIsGhostActive] = useState(false)
 
   useEffect(() => {
     const fetchShortcuts = async () => {
@@ -287,6 +288,35 @@ const Queue: React.FC<QueueProps> = ({ setView, opacity = 0.25, onOpacityChange 
       unsubscribe()
     }
   }, [chatMessages, audioResult])
+
+  // Listen to Ghost Keyboard toggling
+  useEffect(() => {
+    const unsubscribe = window.electronAPI.onToggleGhostMode((isActive) => {
+      setIsGhostActive(isActive)
+      if (isActive) {
+        setIsChatOpen(true)
+      }
+    })
+    return () => {
+      unsubscribe()
+    }
+  }, [])
+
+  // Listen to incoming mirrored keystrokes
+  useEffect(() => {
+    const unsubscribe = window.electronAPI.onGhostKeypress((data) => {
+      if (data.action === "append") {
+        setChatInput((prev) => prev + data.char)
+      } else if (data.action === "backspace") {
+        setChatInput((prev) => prev.slice(0, -1))
+      } else if (data.action === "submit") {
+        handleChatSendRef.current()
+      }
+    })
+    return () => {
+      unsubscribe()
+    }
+  }, [])
 
   // Load current model configuration and mode on mount
   useEffect(() => {
@@ -538,7 +568,7 @@ const Queue: React.FC<QueueProps> = ({ setView, opacity = 0.25, onOpacityChange 
 
           {/* Conditional Chat Interface (broader space) */}
           {isChatOpen && (
-            <div className="mt-4 w-full max-w-[600px] liquid-glass chat-container p-4 flex flex-col text-left">
+            <div className={`mt-4 w-full max-w-[600px] liquid-glass chat-container p-4 flex flex-col text-left ${isGhostActive ? "animate-pulse-border" : ""}`}>
               <div className="flex-1 overflow-y-auto mb-3 p-3 rounded-lg bg-black/5 dark:bg-white/10 backdrop-blur-md max-h-64 min-h-[120px] glass-content border border-black/10 dark:border-white/20 shadow-lg">
                 {chatMessages.length === 0 ? (
                   <div className="text-sm text-secondary text-center mt-8">
@@ -614,6 +644,12 @@ const Queue: React.FC<QueueProps> = ({ setView, opacity = 0.25, onOpacityChange 
                   ))}
                 </div>
               )}
+              {isGhostActive && (
+                <div className="flex items-center gap-1.5 mb-2 px-2.5 py-1 bg-purple-500/10 border border-purple-500/20 text-purple-400 rounded-lg text-[10px] w-fit font-bold animate-pulse select-none">
+                  <span>👻</span>
+                  <span>Ghost Keyboard Active</span>
+                </div>
+              )}
               <form
                 className="flex gap-2 items-center glass-content"
                 onSubmit={e => {
@@ -623,7 +659,11 @@ const Queue: React.FC<QueueProps> = ({ setView, opacity = 0.25, onOpacityChange 
               >
                 <input
                   ref={chatInputRef}
-                  className="flex-1 rounded-lg px-3 py-2 bg-white/40 dark:bg-white/20 backdrop-blur-md text-primary placeholder-secondary/60 text-xs focus:outline-none focus:ring-1 focus:ring-primary/40 border border-black/10 dark:border-white/20 shadow-lg transition-all duration-200"
+                  className={`flex-1 rounded-lg px-3 py-2 bg-white/40 dark:bg-white/20 backdrop-blur-md text-primary placeholder-secondary/60 text-xs focus:outline-none focus:ring-1 focus:ring-primary/40 border shadow-lg transition-all duration-200 ${
+                    isGhostActive
+                      ? "border-purple-500/50 dark:border-purple-500/50 shadow-[0_0_12px_rgba(168,85,247,0.25)]"
+                      : "border-black/10 dark:border-white/20"
+                  }`}
                   placeholder="Type your message..."
                   value={chatInput}
                   onChange={e => setChatInput(e.target.value)}
