@@ -313,4 +313,15 @@ export function initializeIpcHandlers(appState: AppState): void {
       return { success: false, error: error.message }
     }
   })
+
+  ipcMain.handle("simulate-typing", async (_, text: string) => {
+    try {
+      // Run typing simulation asynchronously so renderer is not blocked
+      appState.typingSimulator.startTyping(text)
+      return { success: true }
+    } catch (error: any) {
+      console.error("Error in simulate-typing handler:", error)
+      return { success: false, error: error.message }
+    }
+  })
 }
