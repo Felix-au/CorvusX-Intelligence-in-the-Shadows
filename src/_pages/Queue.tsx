@@ -289,6 +289,26 @@ const Queue: React.FC<QueueProps> = ({ setView, opacity = 0.25, onOpacityChange 
     }
   }, [chatMessages, audioResult])
 
+  // Listen to global simulate typing latest response IPC event
+  useEffect(() => {
+    const unsubscribe = window.electronAPI.onSimulateLatestResponse(() => {
+      const geminiMsgs = chatMessages.filter(m => m.role === "gemini")
+      const latestChatMsg = geminiMsgs.length > 0 ? geminiMsgs[geminiMsgs.length - 1].text : null
+      let textToType = latestChatMsg || audioResult
+      if (textToType) {
+        const codeBlockRegex = /^```(?:\w*)\n([\s\S]*?)```$/
+        const match = codeBlockRegex.exec(textToType.trim())
+        if (match) {
+          textToType = match[1].trim()
+        }
+        window.electronAPI.invoke("simulate-typing", textToType)
+      }
+    })
+    return () => {
+      unsubscribe()
+    }
+  }, [chatMessages, audioResult])
+
   // Listen to Ghost Keyboard toggling
   useEffect(() => {
     const unsubscribe = window.electronAPI.onToggleGhostMode((isActive) => {
