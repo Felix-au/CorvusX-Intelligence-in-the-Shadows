@@ -15,6 +15,7 @@ interface ShortcutsMap {
   newSession: string
   declutter: string
   toggleVoice: string
+  toggleGhostKeyboard: string
 }
 
 const SHORTCUT_LABELS: Record<keyof ShortcutsMap, string> = {
@@ -25,7 +26,8 @@ const SHORTCUT_LABELS: Record<keyof ShortcutsMap, string> = {
   copyLatest: "Copy Latest Response",
   newSession: "New Chat Session",
   declutter: "Declutter UI Display",
-  toggleVoice: "Toggle Voice Recording"
+  toggleVoice: "Toggle Voice Recording",
+  toggleGhostKeyboard: "Toggle Ghost Keyboard Mode"
 }
 
 export const ShortcutManagerModal: React.FC<ShortcutManagerModalProps> = ({
