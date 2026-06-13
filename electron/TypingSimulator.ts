@@ -1,5 +1,4 @@
 import { uIOhook } from "uiohook-napi"
-import { clipboard } from "electron"
 import { AppState } from "./main"
 
 const CHAR_TO_KEY: Record<string, { code: number; shift?: boolean }> = {
@@ -116,142 +115,6 @@ export class TypingSimulator {
         const lineDelay = Math.floor(Math.random() * 100) + 100
         await this.sleep(lineDelay)
       }
-
-      // Post-typing probing and alignment
-      if (this.isTyping) {
-        console.log("[TypingSimulator] Typing loop completed. Starting post-typing probing...")
-        await this.sleep(300) // Wait for editor to settle
-
-        // 1. Select the typed block by holding Shift and pressing Up arrow (lines.length - 1) times, then Home twice
-        uIOhook.keyToggle(42, "down") // Shift down
-        for (let i = 0; i < lines.length - 1; i++) {
-          uIOhook.keyTap(57416) // Up Arrow
-          await this.sleep(20)
-        }
-        uIOhook.keyTap(3655) // Home
-        uIOhook.keyTap(3655) // Home
-        uIOhook.keyToggle(42, "up") // Shift up
-        await this.sleep(100)
-
-        // 2. Backup the current clipboard content
-        const originalClipboard = clipboard.readText()
-
-        // 3. Copy selection
-        clipboard.writeText("")
-        uIOhook.keyToggle(29, "down") // Ctrl down
-        uIOhook.keyTap(46)            // C
-        uIOhook.keyToggle(29, "up")   // Ctrl up
-        await this.sleep(100)
-
-        const copiedText = clipboard.readText()
-        console.log("[TypingSimulator] Copied typed text for correction:", JSON.stringify(copiedText))
-
-        // 4. Restore original clipboard content immediately
-        clipboard.writeText(originalClipboard)
-
-        // 5. Deselect the text by pressing Right Arrow
-        uIOhook.keyTap(57421) // Right Arrow
-        await this.sleep(100)
-
-        if (copiedText) {
-          const copiedLines = copiedText.split(/\r?\n/)
-          const expectedLines = lines
-          const commonLines = Math.min(copiedLines.length, expectedLines.length)
-
-          // 6. Iterate from bottom line (commonLines - 1) up to 0
-          for (let i = commonLines - 1; i >= 0; i--) {
-            if (!this.isTyping) break
-
-            // Ensure cursor is at the end of current line
-            uIOhook.keyTap(3653) // End key
-            await this.sleep(40)
-
-            const copiedLine = copiedLines[i]
-            const expectedLine = expectedLines[i]
-
-            // Check if there is an indentation mismatch
-            const copiedIndentMatch = copiedLine.match(/^(\s*)/)
-            const expectedIndentMatch = expectedLine.match(/^(\s*)/)
-            const copiedIndent = copiedIndentMatch ? copiedIndentMatch[0] : ""
-            const expectedIndent = expectedIndentMatch ? expectedIndentMatch[0] : ""
-
-            if (copiedIndent !== expectedIndent) {
-              console.log(`[TypingSimulator] Indent mismatch on line ${i}: expected "${expectedIndent}", got "${copiedIndent}"`)
-              // Move cursor to absolute start of line
-              uIOhook.keyTap(3655) // Home
-              uIOhook.keyTap(3655) // Home
-              await this.sleep(40)
-
-              if (copiedIndent.length > expectedIndent.length) {
-                // Delete extra spaces (using Delete key)
-                const extraCount = copiedIndent.length - expectedIndent.length
-                for (let k = 0; k < extraCount; k++) {
-                  uIOhook.keyTap(3667) // Delete key
-                  await this.sleep(20)
-                }
-              } else {
-                // Insert missing spaces
-                const missingIndent = expectedIndent.slice(copiedIndent.length)
-                await this.typeString(missingIndent)
-              }
-              // Move cursor to end of line
-              uIOhook.keyTap(3653) // End key
-              await this.sleep(40)
-            }
-
-            // Check if there is a content mismatch (e.g. auto-completed brackets, double chars)
-            const copiedContent = copiedLine.trimStart()
-            const expectedContent = expectedLine.trimStart()
-
-            if (copiedContent !== expectedContent) {
-              console.log(`[TypingSimulator] Content mismatch on line ${i}: expected "${expectedContent}", got "${copiedContent}"`)
-              // Check if copiedContent simply ends with extra characters (like stray parenthesises or brackets)
-              if (copiedContent.startsWith(expectedContent) && copiedContent.length > expectedContent.length) {
-                // Go to the end of the line and Backspace the extra characters
-                uIOhook.keyTap(3653) // End key
-                await this.sleep(40)
-
-                const extraCount = copiedContent.length - expectedContent.length
-                for (let k = 0; k < extraCount; k++) {
-                  uIOhook.keyTap(14) // Backspace key
-                  await this.sleep(20)
-                }
-              } else {
-                // Fallback: Select the entire content after indentation and replace it
-                // Go to the absolute start of line
-                uIOhook.keyTap(3655) // Home
-                uIOhook.keyTap(3655) // Home
-                await this.sleep(40)
-
-                // Move cursor past the indentation
-                for (let k = 0; k < expectedIndent.length; k++) {
-                  uIOhook.keyTap(57421) // Right Arrow
-                  await this.sleep(20)
-                }
-
-                // Select to the end of the line
-                uIOhook.keyToggle(42, "down") // Shift down
-                uIOhook.keyTap(3653) // End key
-                uIOhook.keyToggle(42, "up") // Shift up
-                await this.sleep(40)
-
-                // Backspace the selection
-                uIOhook.keyTap(14) // Backspace
-                await this.sleep(40)
-
-                // Type expected content
-                await this.typeString(expectedContent)
-              }
-            }
-
-            // Move cursor to the line above (except for the first line)
-            if (i > 0) {
-              uIOhook.keyTap(57416) // Up Arrow
-              await this.sleep(40)
-            }
-          }
-        }
-      }
     } catch (err) {
       console.error("[TypingSimulator] Error during typing simulation:", err)
     } finally {
@@ -260,7 +123,7 @@ export class TypingSimulator {
     }
   }
 
-  private sendKey(char: string): void {
+  private async tapKey(char: string): Promise<void> {
     const mapping = CHAR_TO_KEY[char]
     if (mapping) {
       if (mapping.shift) {
@@ -275,40 +138,57 @@ export class TypingSimulator {
     for (const char of str) {
       if (!this.isTyping) break
 
-      // 2% chance of introducing a typo for letters (a-zA-Z)
       const isLetter = /^[a-zA-Z]$/.test(char)
-      if (isLetter && Math.random() < 0.02) {
+      if (isLetter && Math.random() < 0.07) {
+        // Trigger typo simulation
+        const letters = "abcdefghijklmnopqrstuvwxyz"
+        const charLower = char.toLowerCase()
+        let typoChar = letters[Math.floor(Math.random() * letters.length)]
+        if (typoChar === charLower) {
+          typoChar = charLower === "a" ? "b" : "a"
+        }
+        if (char === char.toUpperCase()) {
+          typoChar = typoChar.toUpperCase()
+        }
+
         const isDoubleType = Math.random() < 0.5
         if (isDoubleType) {
-          // Double-type typo
-          this.sendKey(char)
+          // Type correct letter twice
+          await this.tapKey(char)
           await this.sleep(Math.floor(Math.random() * 50) + 50)
-          
-          this.sendKey(char)
+          await this.tapKey(char)
+
+          // Pause before correction
           await this.sleep(Math.floor(Math.random() * 100) + 100)
-          
-          uIOhook.keyTap(14) // Backspace
+          if (!this.isTyping) break
+
+          // Backspace to delete the extra character
+          uIOhook.keyTap(14)
+
+          // Pause after correction
           await this.sleep(Math.floor(Math.random() * 100) + 100)
         } else {
-          // Mistype typo
-          const letters = "abcdefghijklmnopqrstuvwxyz"
-          let typoChar = letters.charAt(Math.floor(Math.random() * letters.length))
-          if (typoChar === char.toLowerCase()) {
-            typoChar = typoChar === "a" ? "b" : "a"
-          }
-          if (char === char.toUpperCase()) {
-            typoChar = typoChar.toUpperCase()
-          }
+          // Type mistyped letter
+          await this.tapKey(typoChar)
 
-          this.sendKey(typoChar)
+          // Pause before correction
           await this.sleep(Math.floor(Math.random() * 100) + 100)
+          if (!this.isTyping) break
 
-          uIOhook.keyTap(14) // Backspace
+          // Backspace to delete the typo
+          uIOhook.keyTap(14)
+
+          // Pause after correction
           await this.sleep(Math.floor(Math.random() * 100) + 100)
+          if (!this.isTyping) break
+
+          // Type correct letter
+          await this.tapKey(char)
         }
+      } else {
+        // Type normally
+        await this.tapKey(char)
       }
-
-      this.sendKey(char)
 
       // Random delay between keystrokes to mimic human typing (100ms - 250ms)
       const delay = Math.floor(Math.random() * 150) + 100
