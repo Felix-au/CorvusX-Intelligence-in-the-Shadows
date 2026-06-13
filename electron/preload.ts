@@ -38,6 +38,8 @@ interface ElectronAPI {
   onToggleVoiceRecording: (callback: () => void) => () => void
   onGlobalEnterPressed: (callback: () => void) => () => void
   onCopyLatestResponse: (callback: () => void) => () => void
+  onToggleGhostMode: (callback: (isActive: boolean) => void) => () => void
+  onGhostKeypress: (callback: (data: { char: string; action: "append" | "backspace" | "clear" | "submit" }) => void) => () => void
   
   // LLM Model Management
   getCurrentLlmConfig: () => Promise<{ provider: "gemini"; model: string; isOllama: boolean }>
@@ -201,6 +203,20 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.on("copy-latest-response", subscription)
     return () => {
       ipcRenderer.removeListener("copy-latest-response", subscription)
+    }
+  },
+  onToggleGhostMode: (callback: (isActive: boolean) => void) => {
+    const subscription = (_: any, isActive: boolean) => callback(isActive)
+    ipcRenderer.on("toggle-ghost-mode", subscription)
+    return () => {
+      ipcRenderer.removeListener("toggle-ghost-mode", subscription)
+    }
+  },
+  onGhostKeypress: (callback: (data: { char: string; action: "append" | "backspace" | "clear" | "submit" }) => void) => {
+    const subscription = (_: any, data: { char: string; action: "append" | "backspace" | "clear" | "submit" }) => callback(data)
+    ipcRenderer.on("ghost-keypress", subscription)
+    return () => {
+      ipcRenderer.removeListener("ghost-keypress", subscription)
     }
   },
   moveWindowLeft: () => ipcRenderer.invoke("move-window-left"),
