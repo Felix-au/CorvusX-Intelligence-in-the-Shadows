@@ -11,6 +11,7 @@ export interface AppShortcuts {
   newSession: string
   declutter: string
   toggleVoice: string
+  toggleGhostKeyboard: string
 }
 
 export interface AppConfig {
@@ -34,7 +35,8 @@ const DEFAULT_SHORTCUTS: AppShortcuts = {
   copyLatest: "CommandOrControl+Alt+C",
   newSession: "CommandOrControl+O",
   declutter: "CommandOrControl+U",
-  toggleVoice: "CommandOrControl+Shift+V"
+  toggleVoice: "CommandOrControl+Shift+V",
+  toggleGhostKeyboard: "CommandOrControl+Alt+X"
 }
 
 const DEFAULT_CONFIG: AppConfig = {
