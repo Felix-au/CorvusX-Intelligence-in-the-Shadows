@@ -21,7 +21,8 @@ export class ShortcutsHelper {
       copyLatest: "CommandOrControl+Alt+C",
       newSession: "CommandOrControl+O",
       declutter: "CommandOrControl+U",
-      toggleVoice: "CommandOrControl+Shift+V"
+      toggleVoice: "CommandOrControl+Shift+V",
+      toggleGhostKeyboard: "CommandOrControl+Alt+X"
     }
 
     // Register showCenter shortcut
@@ -103,6 +104,17 @@ export class ShortcutsHelper {
       })
     } catch (err) {
       console.error("Failed to register copyLatest shortcut:", err)
+    }
+
+    // Register toggleGhostKeyboard shortcut
+    try {
+      const ghostShortcut = shortcuts.toggleGhostKeyboard || "CommandOrControl+Alt+X"
+      globalShortcut.register(ghostShortcut, () => {
+        console.log("Toggle ghost keyboard shortcut pressed...")
+        this.appState.ghostKeyboardHelper.toggle()
+      })
+    } catch (err) {
+      console.error("Failed to register toggleGhostKeyboard shortcut:", err)
     }
 
     // Unregister shortcuts when quitting
