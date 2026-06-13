@@ -123,18 +123,55 @@ export class TypingSimulator {
     }
   }
 
+  private sendKey(char: string): void {
+    const mapping = CHAR_TO_KEY[char]
+    if (mapping) {
+      if (mapping.shift) {
+        uIOhook.keyTap(mapping.code, [42]) // Type with Shift modifier
+      } else {
+        uIOhook.keyTap(mapping.code)
+      }
+    }
+  }
+
   private async typeString(str: string): Promise<void> {
     for (const char of str) {
       if (!this.isTyping) break
 
-      const mapping = CHAR_TO_KEY[char]
-      if (mapping) {
-        if (mapping.shift) {
-          uIOhook.keyTap(mapping.code, [42]) // Type with Shift modifier
+      // 2% chance of introducing a typo for letters (a-zA-Z)
+      const isLetter = /^[a-zA-Z]$/.test(char)
+      if (isLetter && Math.random() < 0.02) {
+        const isDoubleType = Math.random() < 0.5
+        if (isDoubleType) {
+          // Double-type typo
+          this.sendKey(char)
+          await this.sleep(Math.floor(Math.random() * 50) + 50)
+          
+          this.sendKey(char)
+          await this.sleep(Math.floor(Math.random() * 100) + 100)
+          
+          uIOhook.keyTap(14) // Backspace
+          await this.sleep(Math.floor(Math.random() * 100) + 100)
         } else {
-          uIOhook.keyTap(mapping.code)
+          // Mistype typo
+          const letters = "abcdefghijklmnopqrstuvwxyz"
+          let typoChar = letters.charAt(Math.floor(Math.random() * letters.length))
+          if (typoChar === char.toLowerCase()) {
+            typoChar = typoChar === "a" ? "b" : "a"
+          }
+          if (char === char.toUpperCase()) {
+            typoChar = typoChar.toUpperCase()
+          }
+
+          this.sendKey(typoChar)
+          await this.sleep(Math.floor(Math.random() * 100) + 100)
+
+          uIOhook.keyTap(14) // Backspace
+          await this.sleep(Math.floor(Math.random() * 100) + 100)
         }
       }
+
+      this.sendKey(char)
 
       // Random delay between keystrokes to mimic human typing (100ms - 250ms)
       const delay = Math.floor(Math.random() * 150) + 100
