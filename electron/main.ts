@@ -6,6 +6,7 @@ import { ShortcutsHelper } from "./shortcuts"
 import { ProcessingHelper } from "./ProcessingHelper"
 import { ConfigHelper } from "./ConfigHelper"
 import { GhostKeyboardHelper } from "./GhostKeyboardHelper"
+import { TypingSimulator } from "./TypingSimulator"
 
 export class AppState {
   private static instance: AppState | null = null
@@ -16,6 +17,7 @@ export class AppState {
   public processingHelper: ProcessingHelper
   public configHelper: ConfigHelper
   public ghostKeyboardHelper: GhostKeyboardHelper
+  public typingSimulator: TypingSimulator
   private tray: Tray | null = null
 
   // View management
@@ -67,6 +69,9 @@ export class AppState {
 
     // Initialize GhostKeyboardHelper
     this.ghostKeyboardHelper = new GhostKeyboardHelper(this)
+
+    // Initialize TypingSimulator
+    this.typingSimulator = new TypingSimulator(this)
   }
 
   public static getInstance(): AppState {
