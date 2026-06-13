@@ -22,7 +22,8 @@ export class ShortcutsHelper {
       newSession: "CommandOrControl+O",
       declutter: "CommandOrControl+U",
       toggleVoice: "CommandOrControl+Shift+V",
-      toggleGhostKeyboard: "CommandOrControl+Alt+X"
+      toggleGhostKeyboard: "CommandOrControl+Alt+X",
+      simulateTyping: "CommandOrControl+Alt+K"
     }
 
     // Register showCenter shortcut
@@ -115,6 +116,25 @@ export class ShortcutsHelper {
       })
     } catch (err) {
       console.error("Failed to register toggleGhostKeyboard shortcut:", err)
+    }
+
+    // Register simulateTyping shortcut
+    try {
+      const typingShortcut = shortcuts.simulateTyping || "CommandOrControl+Alt+K"
+      globalShortcut.register(typingShortcut, () => {
+        if (this.appState.typingSimulator.isCurrentlyTyping()) {
+          console.log("Typing is already active, cancelling...")
+          this.appState.typingSimulator.cancelTyping()
+        } else {
+          const mainWindow = this.appState.getMainWindow()
+          if (mainWindow && !mainWindow.isDestroyed()) {
+            console.log("Triggering typing simulation...")
+            mainWindow.webContents.send("simulate-latest-response")
+          }
+        }
+      })
+    } catch (err) {
+      console.error("Failed to register simulateTyping shortcut:", err)
     }
 
     // Unregister shortcuts when quitting
