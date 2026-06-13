@@ -644,12 +644,7 @@ const Queue: React.FC<QueueProps> = ({ setView, opacity = 0.25, onOpacityChange 
                   ))}
                 </div>
               )}
-              {isGhostActive && (
-                <div className="flex items-center gap-1.5 mb-2 px-2.5 py-1 bg-purple-500/10 border border-purple-500/20 text-purple-400 rounded-lg text-[10px] w-fit font-bold animate-pulse select-none">
-                  <span>👻</span>
-                  <span>Ghost Keyboard Active</span>
-                </div>
-              )}
+
               <form
                 className="flex gap-2 items-center glass-content"
                 onSubmit={e => {
