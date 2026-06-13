@@ -205,7 +205,8 @@ button, input, select, textarea, .interactive {
 /* Custom animation disabling when pulsing effects are turned off */
 .disable-pulse .liquid-glass::before,
 .disable-pulse .liquid-glass-bar::before,
-.disable-pulse .animate-pulse {
+.disable-pulse .animate-pulse,
+.disable-pulse .animate-pulse-border {
   animation: none !important;
   transition: none !important;
 }
