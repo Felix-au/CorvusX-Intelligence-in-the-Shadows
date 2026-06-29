@@ -85,6 +85,8 @@ const Queue: React.FC<QueueProps> = ({ setView, opacity = 0.25, onOpacityChange 
   const [mode, setMode] = useState<'code' | 'general'>('code')
   const [shortcuts, setShortcuts] = useState<ShortcutsMap | null>(null)
   const [isGhostActive, setIsGhostActive] = useState(false)
+  const [statusLedEnabled, setStatusLedEnabled] = useState<boolean>(true)
+  const [hasError, setHasError] = useState<boolean>(false)
 
   useEffect(() => {
     const fetchShortcuts = async () => {
@@ -227,10 +229,12 @@ const Queue: React.FC<QueueProps> = ({ setView, opacity = 0.25, onOpacityChange 
           reader.onloadend = async () => {
             const base64Data = (reader.result as string).split(',')[1]
             try {
+              setHasError(false)
               setIsAudioLoading(true)
               const result = await window.electronAPI.analyzeAudioFromBase64(base64Data, blob.type)
               setAudioResult(result.text)
             } catch (err: any) {
+              setHasError(true)
               const errMsg = err?.message || String(err)
               setAudioResult('Audio analysis failed: ' + errMsg.replace(/^Error:\s*/i, ''))
             } finally {
@@ -244,6 +248,7 @@ const Queue: React.FC<QueueProps> = ({ setView, opacity = 0.25, onOpacityChange 
         isRecordingRef.current = true
         setIsRecording(true)
       } catch (err) {
+        setHasError(true)
         setAudioResult('Could not start recording.')
       }
     } else {
@@ -389,8 +394,11 @@ const Queue: React.FC<QueueProps> = ({ setView, opacity = 0.25, onOpacityChange 
   useEffect(() => {
     const loadCurrentModelAndMode = async () => {
       try {
-        const config = await window.electronAPI.getCurrentLlmConfig();
-        setCurrentModel({ provider: config.provider, model: config.model });
+        const config = await window.electronAPI.invoke("get-app-config");
+        if (config) {
+          setCurrentModel({ provider: config.provider, model: config.model });
+          setStatusLedEnabled(config.statusLedEnabled !== false);
+        }
         
         const activeMode = await window.electronAPI.getLlmMode();
         setMode(activeMode);
@@ -573,6 +581,9 @@ const Queue: React.FC<QueueProps> = ({ setView, opacity = 0.25, onOpacityChange 
               isAudioLoading={isAudioLoading}
               isRecording={isRecording}
               onRecordingToggle={handleRecordingToggle}
+              statusLedEnabled={statusLedEnabled}
+              isChatLoading={chatLoading}
+              hasError={hasError}
             />
           </div>
 
@@ -619,6 +630,8 @@ const Queue: React.FC<QueueProps> = ({ setView, opacity = 0.25, onOpacityChange 
                 onModeSwitch={setMode}
                 opacity={opacity}
                 onOpacityChange={onOpacityChange}
+                statusLedEnabled={statusLedEnabled}
+                onStatusLedChange={setStatusLedEnabled}
               />
             </div>
           )}

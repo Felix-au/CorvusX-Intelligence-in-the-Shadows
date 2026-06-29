@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react"
+import React from "react"
 import { IoLogOutOutline } from "react-icons/io5"
 
 interface QueueCommandsProps {
@@ -14,6 +14,9 @@ interface QueueCommandsProps {
   isAudioLoading?: boolean;
   isRecording?: boolean;
   onRecordingToggle?: () => void;
+  statusLedEnabled?: boolean;
+  isChatLoading?: boolean;
+  hasError?: boolean;
 }
 
 const QueueCommands: React.FC<QueueCommandsProps> = ({
@@ -26,14 +29,46 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
   chatMessagesCount,
   mode,
   onModeToggle,
-  isAudioLoading: _isAudioLoading,
+  isAudioLoading = false,
   isRecording = false,
-  onRecordingToggle
+  onRecordingToggle,
+  statusLedEnabled = true,
+  isChatLoading = false,
+  hasError = false
 }) => {
+
+  const getStatusDetails = () => {
+    if (hasError) {
+      return {
+        colorClass: "bg-red-500 shadow-[0_0_6px_rgba(239,68,68,0.6)]",
+        title: "System Error"
+      };
+    }
+    if (isChatLoading || isAudioLoading) {
+      return {
+        colorClass: "bg-yellow-500 shadow-[0_0_6px_rgba(234,179,8,0.6)] animate-pulse",
+        title: "AI Processing..."
+      };
+    }
+    return {
+      colorClass: "bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.4)]",
+      title: "Stealth Assistant Idle & Ready"
+    };
+  };
+
+  const { colorClass, title: statusTitle } = getStatusDetails();
 
   return (
     <div className="w-fit overflow-visible">
       <div className="text-xs text-primary liquid-glass-bar py-1 px-4 flex flex-row flex-nowrap items-center justify-center gap-4 draggable-area whitespace-nowrap overflow-visible">
+        
+        {/* Stealth Status LED */}
+        {statusLedEnabled && (
+          <div className="flex items-center justify-center shrink-0 w-2.5 h-2.5" title={statusTitle}>
+            <span className={`w-2 h-2 rounded-full ${colorClass}`} />
+          </div>
+        )}
+
         {/* Show/Hide */}
         <div className="flex items-center gap-2 shrink-0 whitespace-nowrap">
           <span className="text-[11px] leading-none text-secondary shrink-0 whitespace-nowrap">Show/Hide</span>

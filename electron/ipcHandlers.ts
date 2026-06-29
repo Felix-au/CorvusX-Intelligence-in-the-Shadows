@@ -235,7 +235,7 @@ export function initializeIpcHandlers(appState: AppState): void {
     }
   });
 
-  ipcMain.handle("complete-onboarding", async (_, apiKey: string, provider: 'gemini' | 'omnikey', model: string, mode: 'code' | 'general', theme?: 'light' | 'dark', opacity?: number, onboardingCompleted?: boolean, pulseEnabled?: boolean, codingLanguage?: string) => {
+  ipcMain.handle("complete-onboarding", async (_, apiKey: string, provider: 'gemini' | 'omnikey', model: string, mode: 'code' | 'general', theme?: 'light' | 'dark', opacity?: number, onboardingCompleted?: boolean, pulseEnabled?: boolean, codingLanguage?: string, statusLedEnabled?: boolean, captureSystemAudio?: boolean, selectedDevice?: string) => {
     try {
       const llmHelper = appState.processingHelper.getLLMHelper();
       
@@ -249,7 +249,10 @@ export function initializeIpcHandlers(appState: AppState): void {
         theme: theme || 'dark',
         opacity: opacity !== undefined ? opacity : 0.25,
         pulseEnabled: pulseEnabled !== undefined ? pulseEnabled : true,
-        codingLanguage: codingLanguage || 'Auto-Detect'
+        codingLanguage: codingLanguage || 'Auto-Detect',
+        statusLedEnabled: statusLedEnabled !== undefined ? statusLedEnabled : true,
+        captureSystemAudio: captureSystemAudio !== undefined ? captureSystemAudio : false,
+        selectedDevice: selectedDevice || 'default'
       });
 
       // Switch in memory
