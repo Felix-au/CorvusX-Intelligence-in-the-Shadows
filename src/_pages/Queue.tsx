@@ -177,6 +177,38 @@ const Queue: React.FC<QueueProps> = ({ setView, opacity = 0.25, onOpacityChange 
     }
   }
 
+  const handleCopyCode = (text: string) => {
+    const codeBlockRegex = /```(?:\w*)\n([\s\S]*?)```/g;
+    const matches: string[] = [];
+    let match;
+    while ((match = codeBlockRegex.exec(text)) !== null) {
+      matches.push(match[1].trim());
+    }
+    const textToCopy = matches.length > 0 ? matches.join("\n\n") : text;
+    window.electronAPI.invoke("write-to-clipboard", textToCopy);
+  };
+
+  const handleRegenerate = async () => {
+    if (chatLoading) return;
+    setChatLoading(true);
+    setChatMessages(prev => {
+      const copy = [...prev];
+      if (copy.length > 0 && copy[copy.length - 1].role === "gemini") {
+        copy.pop();
+      }
+      return copy;
+    });
+
+    try {
+      const response = await window.electronAPI.invoke("gemini-regenerate");
+      setChatMessages(prev => [...prev, { role: "gemini", text: response }]);
+    } catch (err) {
+      setChatMessages(prev => [...prev, { role: "gemini", text: "Error: " + String(err) }]);
+    } finally {
+      setChatLoading(false);
+    }
+  };
+
   const handleRecordingToggle = async () => {
     if (!isRecordingRef.current) {
       try {
@@ -337,6 +369,21 @@ const Queue: React.FC<QueueProps> = ({ setView, opacity = 0.25, onOpacityChange 
       unsubscribe()
     }
   }, [])
+
+  const handleRegenerateRef = useRef(handleRegenerate);
+  useEffect(() => {
+    handleRegenerateRef.current = handleRegenerate;
+  }, [handleRegenerate]);
+
+  // Listen to global regenerate response IPC event
+  useEffect(() => {
+    const unsubscribe = window.electronAPI.onRegenerateLastResponse(() => {
+      handleRegenerateRef.current();
+    });
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   // Load current model configuration and mode on mount
   useEffect(() => {
@@ -624,6 +671,29 @@ const Queue: React.FC<QueueProps> = ({ setView, opacity = 0.25, onOpacityChange 
                           </div>
                         )}
                         {renderMarkdown(msg.text)}
+                        {msg.role === "gemini" && (
+                          <div className="flex items-center gap-3 mt-1.5 pt-1 border-t border-black/5 dark:border-white/5 select-none">
+                            <button
+                              type="button"
+                              onClick={() => handleCopyCode(msg.text)}
+                              className="text-[9px] text-secondary hover:text-primary flex items-center gap-0.5 cursor-pointer transition-colors border-none bg-transparent p-0"
+                              title="Copy Code Solution"
+                            >
+                              📄 Copy Code
+                            </button>
+                            {idx === chatMessages.length - 1 && (
+                              <button
+                                type="button"
+                                onClick={handleRegenerate}
+                                disabled={chatLoading}
+                                className="text-[9px] text-secondary hover:text-primary disabled:opacity-50 flex items-center gap-0.5 cursor-pointer transition-colors border-none bg-transparent p-0"
+                                title="Regenerate Last Response"
+                              >
+                                🔄 Regenerate
+                              </button>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))
