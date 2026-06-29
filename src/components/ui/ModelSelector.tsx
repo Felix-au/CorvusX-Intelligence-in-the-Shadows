@@ -643,29 +643,31 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
                 </button>
               </div>
 
-              {/* Audio Loopback Test Button & Status */}
-              <div className="bg-black/5 dark:bg-white/5 p-2 rounded-lg border border-black/10 dark:border-white/20 space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-[10px] font-bold text-primary uppercase tracking-wider">Diagnostic Audio Loopback</span>
+              {/* Diagnostic Audio Loopback Toggle */}
+              <div className="space-y-1.5 bg-black/5 dark:bg-white/5 p-2 rounded-lg border border-black/10 dark:border-white/20 flex items-center justify-between">
+                <div>
+                  <label className="text-[10px] font-bold text-primary block uppercase tracking-wider">Diagnostic Audio Loopback</label>
+                  <span className="text-[8px] text-muted leading-normal block">
+                    {audioTestStatus ? `📢 ${audioTestStatus}` : 'Test microphone & system audio routing.'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
                   {isTestingAudio && (
-                    <span className="text-[10px] font-bold text-green-500 animate-pulse">
-                      ● Live Loopback
+                    <span className="text-[9px] text-green-500 animate-pulse font-semibold">
+                      ● Live
                     </span>
                   )}
-                </div>
-                <div className="flex gap-2 items-center">
                   <button
                     type="button"
+                    role="switch"
+                    aria-checked={isTestingAudio}
                     onClick={startAudioTest}
-                    className="px-2.5 py-1.5 bg-gray-700 hover:bg-gray-800 text-[10px] font-bold text-white rounded shadow cursor-pointer transition-colors"
+                    className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none interactive ${isTestingAudio ? 'bg-green-600' : 'bg-black/25 dark:bg-white/10'}`}
                   >
-                    {isTestingAudio ? 'Stop Loopback Test' : 'Test Audio Loopback'}
+                    <span
+                      className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isTestingAudio ? 'translate-x-4' : 'translate-x-0'}`}
+                    />
                   </button>
-                  {audioTestStatus && (
-                    <span className="text-[9px] text-secondary font-medium truncate flex-1">
-                      📢 {audioTestStatus}
-                    </span>
-                  )}
                 </div>
               </div>
             </div>
