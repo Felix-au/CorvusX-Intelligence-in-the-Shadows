@@ -468,6 +468,23 @@ export class LLMHelper {
     }
   }
 
+  public async regenerateLastResponse(): Promise<string> {
+    try {
+      if (this.chatHistory.length > 0 && this.chatHistory[this.chatHistory.length - 1].role === 'model') {
+        this.chatHistory.pop();
+      }
+      if (this.chatHistory.length > 0 && this.chatHistory[this.chatHistory.length - 1].role === 'user') {
+        const responseText = await this.generateContentCall(this.chatHistory);
+        this.chatHistory.push({ role: 'model', parts: [{ text: responseText }] });
+        return responseText;
+      }
+      throw new Error("No previous conversation turns to regenerate");
+    } catch (error) {
+      console.error("[LLMHelper] Error in regenerateLastResponse:", error);
+      throw error;
+    }
+  }
+
   public async chat(message: string): Promise<string> {
     return this.chatWithGemini(message);
   }

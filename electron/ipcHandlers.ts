@@ -113,6 +113,16 @@ export function initializeIpcHandlers(appState: AppState): void {
     }
   });
 
+  ipcMain.handle("gemini-regenerate", async (event) => {
+    try {
+      const result = await appState.processingHelper.getLLMHelper().regenerateLastResponse();
+      return result;
+    } catch (error: any) {
+      console.error("Error in gemini-regenerate handler:", error);
+      throw error;
+    }
+  });
+
   ipcMain.handle("quit-app", () => {
     app.quit()
   })
