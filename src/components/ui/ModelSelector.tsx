@@ -49,6 +49,22 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
   const [audioTestCountdown, setAudioTestCountdown] = useState<number>(0);
   const [audioTestStatus, setAudioTestStatus] = useState<string>('');
 
+  const audioContextRef = React.useRef<AudioContext | null>(null);
+  const audioStreamRef = React.useRef<MediaStream | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (audioContextRef.current) {
+        audioContextRef.current.close().catch(console.error);
+        audioContextRef.current = null;
+      }
+      if (audioStreamRef.current) {
+        audioStreamRef.current.getTracks().forEach(track => track.stop());
+        audioStreamRef.current = null;
+      }
+    };
+  }, []);
+
   // Accordion section states
   const [activeSection, setActiveSection] = useState<'ai' | 'audio' | 'ui' | null>('ai');
 
@@ -239,76 +255,95 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
     }
   };
 
+  const stopAudioTest = () => {
+    if (audioContextRef.current) {
+      audioContextRef.current.close().catch(console.error);
+      audioContextRef.current = null;
+    }
+    if (audioStreamRef.current) {
+      audioStreamRef.current.getTracks().forEach(track => track.stop());
+      audioStreamRef.current = null;
+    }
+    setIsTestingAudio(false);
+    setAudioTestStatus('Test stopped');
+  };
+
   const startAudioTest = async () => {
-    if (isTestingAudio) return;
+    if (isTestingAudio) {
+      stopAudioTest();
+      return;
+    }
 
     try {
       setIsTestingAudio(true);
-      setAudioTestStatus('Accessing device...');
-      
+      setAudioTestStatus('Requesting mic stream...');
+
+      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      audioContextRef.current = audioCtx;
+
       const constraints: MediaStreamConstraints = {
         audio: selectedDevice === 'default' ? true : { deviceId: { exact: selectedDevice } }
       };
+      const micStream = await navigator.mediaDevices.getUserMedia(constraints);
+      audioStreamRef.current = micStream;
 
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      const mediaRecorder = new MediaRecorder(stream);
-      const chunks: Blob[] = [];
+      const micSource = audioCtx.createMediaStreamSource(micStream);
+      const dest = audioCtx.createMediaStreamDestination();
+      micSource.connect(dest);
 
-      mediaRecorder.ondataavailable = (e) => {
-        if (e.data && e.data.size > 0) {
-          chunks.push(e.data);
-        }
-      };
+      if (captureSystemAudio) {
+        setAudioTestStatus('Mixing mic + system stream...');
+        try {
+          const sourceId = await window.electronAPI.invoke("get-desktop-audio-source-id");
+          if (sourceId) {
+            const systemStream = await navigator.mediaDevices.getUserMedia({
+              audio: {
+                mandatory: {
+                  chromeMediaSource: 'desktop',
+                  chromeMediaSourceId: sourceId
+                }
+              } as any,
+              video: {
+                mandatory: {
+                  chromeMediaSource: 'desktop',
+                  chromeMediaSourceId: sourceId
+                }
+              } as any
+            });
 
-      mediaRecorder.onstop = () => {
-        setAudioTestStatus('Playing loopback...');
-        const blob = new Blob(chunks, { type: chunks[0]?.type || 'audio/webm' });
-        const audioUrl = URL.createObjectURL(blob);
-        const audio = new Audio(audioUrl);
-        
-        audio.onended = () => {
-          setIsTestingAudio(false);
-          setAudioTestStatus('Test complete');
-          stream.getTracks().forEach(track => track.stop());
-        };
+            systemStream.getVideoTracks().forEach(track => track.stop());
+            systemStream.getAudioTracks().forEach(track => {
+              micStream.addTrack(track);
+            });
 
-        audio.onerror = (err) => {
-          console.error('Audio playback error:', err);
-          setIsTestingAudio(false);
-          setAudioTestStatus('Playback failed');
-          stream.getTracks().forEach(track => track.stop());
-        };
-
-        audio.play().catch(err => {
-          console.error('Failed to play loopback audio:', err);
-          setIsTestingAudio(false);
-          setAudioTestStatus('Playback blocked');
-          stream.getTracks().forEach(track => track.stop());
-        });
-      };
-
-      chunks.length = 0;
-      mediaRecorder.start();
-      setAudioTestStatus('Recording loopback...');
-      
-      let countdown = 3;
-      setAudioTestCountdown(countdown);
-
-      const interval = setInterval(() => {
-        countdown -= 1;
-        setAudioTestCountdown(countdown);
-        if (countdown <= 0) {
-          clearInterval(interval);
-          if (mediaRecorder.state !== 'inactive') {
-            mediaRecorder.stop();
+            const systemSource = audioCtx.createMediaStreamSource(systemStream);
+            systemSource.connect(dest);
           }
+        } catch (err) {
+          console.warn("System audio capture bypass for loopback:", err);
         }
-      }, 1000);
+      }
 
+      const delayNode = audioCtx.createDelay(2.0);
+      delayNode.delayTime.value = 1.0;
+
+      const streamSource = audioCtx.createMediaStreamSource(dest.stream);
+      streamSource.connect(delayNode);
+      delayNode.connect(audioCtx.destination);
+
+      setAudioTestStatus('Live loopback active (1s delay)');
     } catch (err: any) {
       console.error('Audio test failure:', err);
       setIsTestingAudio(false);
       setAudioTestStatus(`Test failed: ${err.message || err}`);
+      if (audioStreamRef.current) {
+        audioStreamRef.current.getTracks().forEach(track => track.stop());
+        audioStreamRef.current = null;
+      }
+      if (audioContextRef.current) {
+        audioContextRef.current.close().catch(console.error);
+        audioContextRef.current = null;
+      }
     }
   };
 
@@ -597,9 +632,9 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
               <div className="bg-black/5 dark:bg-white/5 p-2 rounded-lg border border-black/10 dark:border-white/20 space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="text-[10px] font-bold text-primary uppercase tracking-wider">Diagnostic Audio Loopback</span>
-                  {isTestingAudio && audioTestCountdown > 0 && (
-                    <span className="text-[10px] font-bold text-yellow-500 animate-pulse">
-                      Recording: {audioTestCountdown}s...
+                  {isTestingAudio && (
+                    <span className="text-[10px] font-bold text-green-500 animate-pulse">
+                      ● Live Loopback
                     </span>
                   )}
                 </div>
@@ -607,10 +642,9 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
                   <button
                     type="button"
                     onClick={startAudioTest}
-                    disabled={isTestingAudio}
-                    className="px-2.5 py-1.5 bg-gray-700 hover:bg-gray-800 disabled:opacity-50 text-[10px] font-bold text-white rounded shadow cursor-pointer transition-colors"
+                    className="px-2.5 py-1.5 bg-gray-700 hover:bg-gray-800 text-[10px] font-bold text-white rounded shadow cursor-pointer transition-colors"
                   >
-                    {isTestingAudio ? 'Testing Running...' : 'Test Audio Loopback'}
+                    {isTestingAudio ? 'Stop Loopback Test' : 'Test Audio Loopback'}
                   </button>
                   {audioTestStatus && (
                     <span className="text-[9px] text-secondary font-medium truncate flex-1">
