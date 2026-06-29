@@ -204,7 +204,50 @@ const Queue: React.FC<QueueProps> = ({ setView, opacity = 0.25, onOpacityChange 
   const handleRecordingToggle = async () => {
     if (!isRecordingRef.current) {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+        let stream: MediaStream;
+        const micConstraints = { audio: true };
+        const micStream = await navigator.mediaDevices.getUserMedia(micConstraints);
+        stream = micStream;
+
+        const config = await window.electronAPI.invoke("get-app-config");
+        if (config && config.captureSystemAudio) {
+          try {
+            const sourceId = await window.electronAPI.invoke("get-desktop-audio-source-id");
+            if (sourceId) {
+              const systemStream = await navigator.mediaDevices.getUserMedia({
+                audio: {
+                  mandatory: {
+                    chromeMediaSource: 'desktop',
+                    chromeMediaSourceId: sourceId
+                  }
+                } as any,
+                video: {
+                  mandatory: {
+                    chromeMediaSource: 'desktop',
+                    chromeMediaSourceId: sourceId
+                  }
+                } as any
+              });
+
+              systemStream.getVideoTracks().forEach(track => track.stop());
+
+              const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+              const micSource = audioCtx.createMediaStreamSource(micStream);
+              const systemSource = audioCtx.createMediaStreamSource(systemStream);
+              const dest = audioCtx.createMediaStreamDestination();
+
+              micSource.connect(dest);
+              systemSource.connect(dest);
+
+              stream = dest.stream;
+              (stream as any)._audioCtx = audioCtx;
+              systemStream.getAudioTracks().forEach(track => stream.addTrack(track));
+            }
+          } catch (err) {
+            console.error("Failed to capture system audio for voice capture:", err);
+          }
+        }
+
         const recorder = new MediaRecorder(stream)
         chunksRef.current = []
         recorder.ondataavailable = (e) => {
@@ -213,6 +256,10 @@ const Queue: React.FC<QueueProps> = ({ setView, opacity = 0.25, onOpacityChange 
           }
         }
         recorder.onstop = async () => {
+          stream.getTracks().forEach((track) => track.stop());
+          if ((stream as any)._audioCtx) {
+            ((stream as any)._audioCtx as AudioContext).close().catch(console.error);
+          }
           const blob = new Blob(chunksRef.current, { type: chunksRef.current[0]?.type || 'audio/webm' })
           chunksRef.current = []
           const reader = new FileReader()
