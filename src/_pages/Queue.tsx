@@ -179,16 +179,6 @@ const Queue: React.FC<QueueProps> = ({ setView, opacity = 0.25, onOpacityChange 
     }
   }
 
-  const handleCopyCode = (text: string) => {
-    const codeBlockRegex = /```(?:\w*)\n([\s\S]*?)```/g;
-    const matches: string[] = [];
-    let match;
-    while ((match = codeBlockRegex.exec(text)) !== null) {
-      matches.push(match[1].trim());
-    }
-    const textToCopy = matches.length > 0 ? matches.join("\n\n") : text;
-    window.electronAPI.invoke("write-to-clipboard", textToCopy);
-  };
 
   const handleRegenerate = async () => {
     if (chatLoading) return;
@@ -684,27 +674,17 @@ const Queue: React.FC<QueueProps> = ({ setView, opacity = 0.25, onOpacityChange 
                           </div>
                         )}
                         {renderMarkdown(msg.text)}
-                        {msg.role === "gemini" && (
+                        {msg.role === "gemini" && idx === chatMessages.length - 1 && (
                           <div className="flex items-center gap-3 mt-1.5 pt-1 border-t border-black/5 dark:border-white/5 select-none">
                             <button
                               type="button"
-                              onClick={() => handleCopyCode(msg.text)}
-                              className="text-[9px] text-secondary hover:text-primary flex items-center gap-0.5 cursor-pointer transition-colors border-none bg-transparent p-0"
-                              title="Copy Code Solution"
+                              onClick={handleRegenerate}
+                              disabled={chatLoading}
+                              className="text-[9px] text-secondary hover:text-primary disabled:opacity-50 flex items-center gap-0.5 cursor-pointer transition-colors border-none bg-transparent p-0"
+                              title="Regenerate Last Response"
                             >
-                              📄 Copy Code
+                              Regenerate
                             </button>
-                            {idx === chatMessages.length - 1 && (
-                              <button
-                                type="button"
-                                onClick={handleRegenerate}
-                                disabled={chatLoading}
-                                className="text-[9px] text-secondary hover:text-primary disabled:opacity-50 flex items-center gap-0.5 cursor-pointer transition-colors border-none bg-transparent p-0"
-                                title="Regenerate Last Response"
-                              >
-                                🔄 Regenerate
-                              </button>
-                            )}
                           </div>
                         )}
                       </div>
