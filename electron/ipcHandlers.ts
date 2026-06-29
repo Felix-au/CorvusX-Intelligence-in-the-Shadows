@@ -1,6 +1,6 @@
 // ipcHandlers.ts
 
-import { ipcMain, app, globalShortcut } from "electron"
+import { ipcMain, app, globalShortcut, desktopCapturer } from "electron"
 import { AppState } from "./main"
 
 export function initializeIpcHandlers(appState: AppState): void {
@@ -27,6 +27,16 @@ export function initializeIpcHandlers(appState: AppState): void {
       throw error
     }
   })
+
+  ipcMain.handle("get-desktop-audio-source-id", async () => {
+    try {
+      const sources = await desktopCapturer.getSources({ types: ["screen"] });
+      return sources[0]?.id || null;
+    } catch (error) {
+      console.error("Error getting desktop audio source ID:", error);
+      return null;
+    }
+  });
 
   ipcMain.handle("get-screenshots", async () => {
     console.log({ view: appState.getView() })
