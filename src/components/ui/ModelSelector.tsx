@@ -37,6 +37,14 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
   const [codingLanguage, setCodingLanguage] = useState<string>("Auto-Detect");
   const [statusLedEnabled, setStatusLedEnabled] = useState<boolean>(true);
 
+  // Audio Preferences States
+  const [captureSystemAudio, setCaptureSystemAudio] = useState<boolean>(false);
+  const [audioDevices, setAudioDevices] = useState<MediaDeviceInfo[]>([]);
+  const [selectedDevice, setSelectedDevice] = useState<string>('default');
+  const [isTestingAudio, setIsTestingAudio] = useState<boolean>(false);
+  const [audioTestCountdown, setAudioTestCountdown] = useState<number>(0);
+  const [audioTestStatus, setAudioTestStatus] = useState<string>('');
+
   // Accordion section states
   const [activeSection, setActiveSection] = useState<'ai' | 'audio' | 'ui' | null>('ai');
 
@@ -58,6 +66,23 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
     loadCurrentConfig();
   }, []);
 
+  // Enumerate input devices when audio section is active
+  useEffect(() => {
+    const getDevices = async () => {
+      try {
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const mics = devices.filter(d => d.kind === 'audioinput');
+        setAudioDevices(mics);
+      } catch (err) {
+        console.warn('Failed to enumerate audio devices:', err);
+      }
+    };
+    if (activeSection === 'audio') {
+      getDevices();
+    }
+  }, [activeSection]);
+
   const loadCurrentConfig = async () => {
     try {
       setIsLoading(true);
@@ -71,6 +96,8 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
         setPulseEnabled(config.pulseEnabled !== false);
         setCodingLanguage(config.codingLanguage || "Auto-Detect");
         setStatusLedEnabled(config.statusLedEnabled !== false);
+        setCaptureSystemAudio(config.captureSystemAudio === true);
+        setSelectedDevice(config.selectedDevice || "default");
 
         const modelName = config.model || "gemini-2.5-flash";
         const standardModels = [
@@ -159,7 +186,9 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
           !showTutorialOnStartup, // onboardingCompleted
           pulseEnabled,
           codingLanguage,
-          statusLedEnabled
+          statusLedEnabled,
+          captureSystemAudio,
+          selectedDevice
         );
 
         if (pulseEnabled) {
@@ -183,6 +212,79 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
     } catch (error) {
       setConnectionStatus('error');
       setErrorMessage(String(error));
+    }
+  };
+
+  const startAudioTest = async () => {
+    if (isTestingAudio) return;
+
+    try {
+      setIsTestingAudio(true);
+      setAudioTestStatus('Accessing device...');
+      
+      const constraints: MediaStreamConstraints = {
+        audio: selectedDevice === 'default' ? true : { deviceId: { exact: selectedDevice } }
+      };
+
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      const mediaRecorder = new MediaRecorder(stream);
+      const chunks: Blob[] = [];
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) {
+          chunks.push(e.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        setAudioTestStatus('Playing loopback...');
+        const blob = new Blob(chunks, { type: chunks[0]?.type || 'audio/webm' });
+        const audioUrl = URL.createObjectURL(blob);
+        const audio = new Audio(audioUrl);
+        
+        audio.onended = () => {
+          setIsTestingAudio(false);
+          setAudioTestStatus('Test complete');
+          stream.getTracks().forEach(track => track.stop());
+        };
+
+        audio.onerror = (err) => {
+          console.error('Audio playback error:', err);
+          setIsTestingAudio(false);
+          setAudioTestStatus('Playback failed');
+          stream.getTracks().forEach(track => track.stop());
+        };
+
+        audio.play().catch(err => {
+          console.error('Failed to play loopback audio:', err);
+          setIsTestingAudio(false);
+          setAudioTestStatus('Playback blocked');
+          stream.getTracks().forEach(track => track.stop());
+        });
+      };
+
+      chunks.length = 0;
+      mediaRecorder.start();
+      setAudioTestStatus('Recording loopback...');
+      
+      let countdown = 3;
+      setAudioTestCountdown(countdown);
+
+      const interval = setInterval(() => {
+        countdown -= 1;
+        setAudioTestCountdown(countdown);
+        if (countdown <= 0) {
+          clearInterval(interval);
+          if (mediaRecorder.state !== 'inactive') {
+            mediaRecorder.stop();
+          }
+        }
+      }, 1000);
+
+    } catch (err: any) {
+      console.error('Audio test failure:', err);
+      setIsTestingAudio(false);
+      setAudioTestStatus(`Test failed: ${err.message || err}`);
     }
   };
 
@@ -421,8 +523,77 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
           
           {activeSection === 'audio' && (
             <div className="p-3 space-y-3 bg-transparent border-t border-black/10 dark:border-white/10 animate-fadeIn">
-              <div className="text-[10px] text-secondary/70">
-                Audio source configuration and loopback diagnostic options.
+              {/* Microphone Select */}
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-muted uppercase tracking-wider block">Input Microphone</label>
+                <select
+                  value={selectedDevice}
+                  onChange={(e) => {
+                    setSelectedDevice(e.target.value);
+                    setConnectionStatus(null);
+                  }}
+                  className="w-full px-3 py-1.5 bg-black/5 dark:bg-white/5 text-primary border border-black/10 dark:border-white/20 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-blue-500/40"
+                >
+                  <option className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white" value="default">Default System Mic</option>
+                  {audioDevices.map((device, idx) => (
+                    <option
+                      key={device.deviceId || idx}
+                      className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                      value={device.deviceId}
+                    >
+                      {device.label || `Microphone ${idx + 1}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Capture System Audio Toggle */}
+              <div className="space-y-1.5 bg-black/5 dark:bg-white/5 p-2 rounded-lg border border-black/10 dark:border-white/20 flex items-center justify-between">
+                <div>
+                  <label className="text-[10px] font-bold text-primary block uppercase tracking-wider">Capture System Audio</label>
+                  <span className="text-[8px] text-muted leading-normal block">Capture speakers along with mic.</span>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={captureSystemAudio}
+                  onClick={() => {
+                    setCaptureSystemAudio(prev => !prev);
+                    setConnectionStatus(null);
+                  }}
+                  className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none interactive ${captureSystemAudio ? 'bg-blue-600' : 'bg-black/25 dark:bg-white/10'}`}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${captureSystemAudio ? 'translate-x-4' : 'translate-x-0'}`}
+                  />
+                </button>
+              </div>
+
+              {/* Audio Loopback Test Button & Status */}
+              <div className="bg-black/5 dark:bg-white/5 p-2 rounded-lg border border-black/10 dark:border-white/20 space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] font-bold text-primary uppercase tracking-wider">Diagnostic Audio Loopback</span>
+                  {isTestingAudio && audioTestCountdown > 0 && (
+                    <span className="text-[10px] font-bold text-yellow-500 animate-pulse">
+                      Recording: {audioTestCountdown}s...
+                    </span>
+                  )}
+                </div>
+                <div className="flex gap-2 items-center">
+                  <button
+                    type="button"
+                    onClick={startAudioTest}
+                    disabled={isTestingAudio}
+                    className="px-2.5 py-1.5 bg-gray-700 hover:bg-gray-800 disabled:opacity-50 text-[10px] font-bold text-white rounded shadow cursor-pointer transition-colors"
+                  >
+                    {isTestingAudio ? 'Testing Running...' : 'Test Audio Loopback'}
+                  </button>
+                  {audioTestStatus && (
+                    <span className="text-[9px] text-secondary font-medium truncate flex-1">
+                      📢 {audioTestStatus}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           )}
