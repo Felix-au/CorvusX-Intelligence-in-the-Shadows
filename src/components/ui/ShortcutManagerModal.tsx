@@ -17,6 +17,7 @@ interface ShortcutsMap {
   toggleVoice: string
   toggleGhostKeyboard: string
   simulateTyping: string
+  regenerate: string
 }
 
 const SHORTCUT_LABELS: Record<keyof ShortcutsMap, string> = {
@@ -29,7 +30,8 @@ const SHORTCUT_LABELS: Record<keyof ShortcutsMap, string> = {
   declutter: "Declutter UI Display",
   toggleVoice: "Toggle Voice Recording",
   toggleGhostKeyboard: "Toggle Ghost Keyboard Mode",
-  simulateTyping: "Simulate Typing Response"
+  simulateTyping: "Simulate Typing Response",
+  regenerate: "Regenerate Last Response"
 }
 
 export const ShortcutManagerModal: React.FC<ShortcutManagerModalProps> = ({
