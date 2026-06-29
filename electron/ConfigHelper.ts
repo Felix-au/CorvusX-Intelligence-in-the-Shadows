@@ -43,7 +43,7 @@ const DEFAULT_SHORTCUTS: AppShortcuts = {
   toggleVoice: "CommandOrControl+Shift+V",
   toggleGhostKeyboard: "CommandOrControl+Alt+X",
   simulateTyping: "CommandOrControl+Alt+K",
-  regenerate: "CommandOrControl+Shift+R"
+  regenerate: "CommandOrControl+Shift+Y"
 }
 
 const DEFAULT_CONFIG: AppConfig = {
@@ -93,7 +93,12 @@ export class ConfigHelper {
 
         for (const key of newKeys) {
           if (parsedShortcuts[key] !== undefined) {
-            mergedShortcuts[key] = parsedShortcuts[key]
+            if (key === "regenerate" && parsedShortcuts[key] === "CommandOrControl+Shift+R") {
+              mergedShortcuts[key] = "CommandOrControl+Shift+Y"
+              needsSave = true
+            } else {
+              mergedShortcuts[key] = parsedShortcuts[key]
+            }
           } else {
             needsSave = true
           }

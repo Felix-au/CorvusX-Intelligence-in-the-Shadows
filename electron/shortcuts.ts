@@ -24,7 +24,7 @@ export class ShortcutsHelper {
       toggleVoice: "CommandOrControl+Shift+V",
       toggleGhostKeyboard: "CommandOrControl+Alt+X",
       simulateTyping: "CommandOrControl+Alt+K",
-      regenerate: "CommandOrControl+Shift+R"
+      regenerate: "CommandOrControl+Shift+Y"
     }
 
     // Register showCenter shortcut
@@ -140,7 +140,7 @@ export class ShortcutsHelper {
 
     // Register regenerate shortcut
     try {
-      const regenerateShortcut = shortcuts.regenerate || "CommandOrControl+Shift+R"
+      const regenerateShortcut = shortcuts.regenerate || "CommandOrControl+Shift+Y"
       globalShortcut.register(regenerateShortcut, () => {
         const mainWindow = this.appState.getMainWindow()
         if (mainWindow && !mainWindow.isDestroyed()) {
