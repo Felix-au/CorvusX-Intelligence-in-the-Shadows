@@ -23,7 +23,8 @@ export class ShortcutsHelper {
       declutter: "CommandOrControl+U",
       toggleVoice: "CommandOrControl+Shift+V",
       toggleGhostKeyboard: "CommandOrControl+Alt+X",
-      simulateTyping: "CommandOrControl+Alt+K"
+      simulateTyping: "CommandOrControl+Alt+K",
+      regenerate: "CommandOrControl+Shift+R"
     }
 
     // Register showCenter shortcut
@@ -135,6 +136,20 @@ export class ShortcutsHelper {
       })
     } catch (err) {
       console.error("Failed to register simulateTyping shortcut:", err)
+    }
+
+    // Register regenerate shortcut
+    try {
+      const regenerateShortcut = shortcuts.regenerate || "CommandOrControl+Shift+R"
+      globalShortcut.register(regenerateShortcut, () => {
+        const mainWindow = this.appState.getMainWindow()
+        if (mainWindow && !mainWindow.isDestroyed()) {
+          console.log("Triggering regeneration via global hotkey...")
+          mainWindow.webContents.send("regenerate-last-response")
+        }
+      })
+    } catch (err) {
+      console.error("Failed to register regenerate shortcut:", err)
     }
 
     // Unregister shortcuts when quitting

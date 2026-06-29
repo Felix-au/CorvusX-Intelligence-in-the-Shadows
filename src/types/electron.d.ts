@@ -32,6 +32,7 @@ export interface ElectronAPI {
   onToggleGhostMode: (callback: (isActive: boolean) => void) => () => void
   onGhostKeypress: (callback: (data: { char: string; action: "append" | "backspace" | "clear" | "submit" }) => void) => () => void
   onSimulateLatestResponse: (callback: () => void) => () => void
+  onRegenerateLastResponse: (callback: () => void) => () => void
   getCurrentLlmConfig: () => Promise<{ provider: "gemini" | "omnikey"; model: string; isOllama: boolean }>
   switchToGemini: (apiKey?: string, model?: string) => Promise<{ success: boolean; error?: string }>
   testLlmConnection: (apiKey?: string, model?: string) => Promise<{ success: boolean; error?: string }>

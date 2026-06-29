@@ -13,6 +13,7 @@ export interface AppShortcuts {
   toggleVoice: string
   toggleGhostKeyboard: string
   simulateTyping: string
+  regenerate: string
 }
 
 export interface AppConfig {
@@ -26,6 +27,9 @@ export interface AppConfig {
   pulseEnabled: boolean
   codingLanguage: string
   shortcuts?: AppShortcuts
+  statusLedEnabled?: boolean
+  captureSystemAudio?: boolean
+  selectedDevice?: string
 }
 
 const DEFAULT_SHORTCUTS: AppShortcuts = {
@@ -38,7 +42,8 @@ const DEFAULT_SHORTCUTS: AppShortcuts = {
   declutter: "CommandOrControl+U",
   toggleVoice: "CommandOrControl+Shift+V",
   toggleGhostKeyboard: "CommandOrControl+Alt+X",
-  simulateTyping: "CommandOrControl+Alt+K"
+  simulateTyping: "CommandOrControl+Alt+K",
+  regenerate: "CommandOrControl+Shift+R"
 }
 
 const DEFAULT_CONFIG: AppConfig = {
@@ -51,6 +56,9 @@ const DEFAULT_CONFIG: AppConfig = {
   opacity: 0.25,
   pulseEnabled: true,
   codingLanguage: "Auto-Detect",
+  statusLedEnabled: true,
+  captureSystemAudio: false,
+  selectedDevice: "default",
   shortcuts: DEFAULT_SHORTCUTS
 }
 
@@ -107,6 +115,9 @@ export class ConfigHelper {
           opacity: fileConfig.opacity ?? DEFAULT_CONFIG.opacity,
           pulseEnabled: fileConfig.pulseEnabled ?? DEFAULT_CONFIG.pulseEnabled,
           codingLanguage: fileConfig.codingLanguage ?? DEFAULT_CONFIG.codingLanguage,
+          statusLedEnabled: fileConfig.statusLedEnabled ?? DEFAULT_CONFIG.statusLedEnabled,
+          captureSystemAudio: fileConfig.captureSystemAudio ?? DEFAULT_CONFIG.captureSystemAudio,
+          selectedDevice: fileConfig.selectedDevice ?? DEFAULT_CONFIG.selectedDevice,
           shortcuts: mergedShortcuts
         }
 
