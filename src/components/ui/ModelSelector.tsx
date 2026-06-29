@@ -51,6 +51,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
 
   const audioContextRef = React.useRef<AudioContext | null>(null);
   const audioStreamRef = React.useRef<MediaStream | null>(null);
+  const systemStreamRef = React.useRef<MediaStream | null>(null);
 
   useEffect(() => {
     return () => {
@@ -61,6 +62,10 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
       if (audioStreamRef.current) {
         audioStreamRef.current.getTracks().forEach(track => track.stop());
         audioStreamRef.current = null;
+      }
+      if (systemStreamRef.current) {
+        systemStreamRef.current.getTracks().forEach(track => track.stop());
+        systemStreamRef.current = null;
       }
     };
   }, []);
@@ -264,6 +269,10 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
       audioStreamRef.current.getTracks().forEach(track => track.stop());
       audioStreamRef.current = null;
     }
+    if (systemStreamRef.current) {
+      systemStreamRef.current.getTracks().forEach(track => track.stop());
+      systemStreamRef.current = null;
+    }
     setIsTestingAudio(false);
     setAudioTestStatus('Test stopped');
   };
@@ -288,11 +297,15 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
       audioStreamRef.current = micStream;
 
       const micSource = audioCtx.createMediaStreamSource(micStream);
-      const dest = audioCtx.createMediaStreamDestination();
-      micSource.connect(dest);
+      
+      const delayNode = audioCtx.createDelay(2.0);
+      delayNode.delayTime.value = 1.0;
+      micSource.connect(delayNode);
+      delayNode.connect(audioCtx.destination);
+
+      setAudioTestStatus('Live loopback active (1s delay)');
 
       if (captureSystemAudio) {
-        setAudioTestStatus('Mixing mic + system stream...');
         try {
           const sourceId = await window.electronAPI.invoke("get-desktop-audio-source-id");
           if (sourceId) {
@@ -312,38 +325,40 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
             });
 
             systemStream.getVideoTracks().forEach(track => track.stop());
-            systemStream.getAudioTracks().forEach(track => {
-              micStream.addTrack(track);
-            });
+            systemStreamRef.current = systemStream;
 
             const systemSource = audioCtx.createMediaStreamSource(systemStream);
-            systemSource.connect(dest);
+            const systemAnalyser = audioCtx.createAnalyser();
+            systemAnalyser.fftSize = 256;
+            systemSource.connect(systemAnalyser);
+
+            const dataArray = new Uint8Array(systemAnalyser.frequencyBinCount);
+            const checkVolume = () => {
+              if (!audioContextRef.current || !systemStreamRef.current) return;
+              systemAnalyser.getByteFrequencyData(dataArray);
+              let sum = 0;
+              for (let i = 0; i < dataArray.length; i++) {
+                sum += dataArray[i];
+              }
+              const average = sum / dataArray.length;
+              if (average > 3) {
+                setAudioTestStatus('Live loopback active (System audio detected! 🔊)');
+              } else {
+                setAudioTestStatus('Live loopback active (1s delay)');
+              }
+              setTimeout(checkVolume, 500);
+            };
+            checkVolume();
           }
         } catch (err) {
           console.warn("System audio capture bypass for loopback:", err);
         }
       }
-
-      const delayNode = audioCtx.createDelay(2.0);
-      delayNode.delayTime.value = 1.0;
-
-      const streamSource = audioCtx.createMediaStreamSource(dest.stream);
-      streamSource.connect(delayNode);
-      delayNode.connect(audioCtx.destination);
-
-      setAudioTestStatus('Live loopback active (1s delay)');
     } catch (err: any) {
       console.error('Audio test failure:', err);
       setIsTestingAudio(false);
       setAudioTestStatus(`Test failed: ${err.message || err}`);
-      if (audioStreamRef.current) {
-        audioStreamRef.current.getTracks().forEach(track => track.stop());
-        audioStreamRef.current = null;
-      }
-      if (audioContextRef.current) {
-        audioContextRef.current.close().catch(console.error);
-        audioContextRef.current = null;
-      }
+      stopAudioTest();
     }
   };
 
