@@ -73,6 +73,18 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
     }
   }, [propStatusLedEnabled]);
 
+  const [maxHeight, setMaxHeight] = useState<number>(400);
+
+  useEffect(() => {
+    const updateMaxHeight = () => {
+      const screenHeight = window.screen?.height || 1080;
+      setMaxHeight(Math.round(screenHeight * 0.5));
+    };
+    updateMaxHeight();
+    window.addEventListener('resize', updateMaxHeight);
+    return () => window.removeEventListener('resize', updateMaxHeight);
+  }, []);
+
   useEffect(() => {
     loadCurrentConfig();
   }, []);
@@ -339,8 +351,8 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
         </div>
       </div>
 
-      {/* Main Settings Scroll Area (restricted to 30vh max height) */}
-      <div className="max-h-[30vh] overflow-y-auto pr-1.5 space-y-3 scrollbar-thin scrollbar-thumb-gray-700">
+      {/* Main Settings Scroll Area (restricted to 50% of screen height) */}
+      <div style={{ maxHeight: `${maxHeight}px` }} className="overflow-y-auto pr-1.5 space-y-3 scrollbar-thin scrollbar-thumb-gray-700">
         
         {/* Accordion 1: AI Model & Key Config */}
         <div className="border border-black/10 dark:border-white/10 rounded-lg overflow-hidden">
