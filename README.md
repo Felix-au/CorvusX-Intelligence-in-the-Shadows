@@ -7,8 +7,21 @@ A premium, invisible, always-on-top desktop intelligence overlay that runs silen
 ## 🚀 Key Features
 
 * **Stealth HUD Overlay:** A highly optimized, translucent, and click-through window that sits persistently on top of all applications, toggled instantly via global hotkeys.
+* **Ghost Keyboard Mode & Typo Simulation:** Simulates human-like keyboard input for copying or generating responses directly into active editors or text areas. Includes:
+  * **Mistyping & Error Simulation**: Types with a realistic 7% typo rate, correcting errors on-the-fly using backspace simulation.
+  * **Auto-Indentation Alignment**: Resolves code layouts using selection probing to align with active IDE auto-indentation behaviors.
+  * **Adaptive Typing Speed**: Models human keystroke intervals and delays.
+* **Audio Capture & Mixed Desktop Loopback:**
+  * **Microphone & System Audio Mixing**: Combines microphone input with desktop system audio output silently (without showing prompts) for full transcription context.
+  * **Diagnostic Audio Loopback**: Toggleable live 1.0-second delayed loopback player to diagnose audio streams.
+  * **Echo Loop Prevention**: Routes delayed microphone audio to the speakers, but keeps system capture silent (analyzing sound levels in the background) to prevent screeching feedback loops. Displays `"Live loopback active (System audio detected! 🔊)"` upon detection.
+* **Visual Settings Accordion Panel:** A collapsible settings interface categorizing AI Models, Audio Preferences, and UI Customizations. The maximum height is dynamically restricted to **50% of the monitor's screen height** (independent of Electron's window viewport height) to prevent resizing layout conflicts.
+* **Diagnostic Status LED Indicator:** A pulsing LED indicator in the chat view showing the application status:
+  * **Green (Pulsing)**: Ready for input.
+  * **Amber (Pulsing)**: Querying/Inferring on the backend (processing AI reasoning).
+  * **Red (Pulsing)**: Error occurred.
+  * *Toggled on or off directly within the Settings menu.*
 * **Smart Screen OCR & Vision:** Instantly capture specific screen regions, extract text via Tesseract.js, and process code/diagrams using vision models.
-* **Audio Intelligence:** Process voice recordings and transcripts, perfect for summarizing meeting notes and extracting action items.
 * **Flexible AI Engines:** Out-of-the-box support for direct API integrations:
   * **Google Gemini:** High-speed vision reasoning via Google AI Studio.
   * **OmniKey API:** Unified proxy capabilities for advanced multimodal models.
@@ -73,6 +86,10 @@ OMNIKEY_API_KEY=your_omnikey_api_key_here
 * **`Cmd/Ctrl + U`**: Just declutter the UI (clears chat messages and audio results from display, preserving the backend conversation context).
 * **`Cmd/Ctrl + O`**: Create a new chat session (clears UI and resets the backend conversation history/context completely).
 * **`Cmd/Ctrl + I`**: Toggle the settings and AI models list.
+* **`Cmd/Ctrl + Shift + Y`**: Regenerate the last response.
+* **`Cmd/Ctrl + Shift + V`**: Toggle voice recording transcription.
+* **`Cmd/Ctrl + Alt + X`**: Toggle Ghost Keyboard Mode.
+* **`Cmd/Ctrl + Alt + K`**: Trigger Typing Simulation of the latest response.
 * **`Cmd/Ctrl + Arrow Keys`**: Shift/reposition the overlay window.
 * **`Cmd/Ctrl + Q`**: Exit/quit the application completely.
 
